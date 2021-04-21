@@ -1,0 +1,351 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>API &mdash; ACTIN 2.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Getting started" href="quickstart.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> ACTIN
+          
+
+          
+            
+            <img src="_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Getting started</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">ACTIN</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>API</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/api.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="api">
+<span id="id1"></span><h1>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="module-actin2"></span><dl class="py class">
+<dt id="actin2.ACTIN">
+<em class="property">class </em><code class="sig-prename descclassname">actin2.</code><code class="sig-name descname">ACTIN</code><a class="headerlink" href="#actin2.ACTIN" title="Permalink to this definition">¶</a></dt>
+<dd><p>The ACTIN class. Reads fits files and calculates activity indices.</p>
+<dl class="py attribute">
+<dt id="actin2.ACTIN.ReadSpec">
+<code class="sig-name descname">ReadSpec</code><a class="headerlink" href="#actin2.ACTIN.ReadSpec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Object that reads spectrum and
+headers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#actin2.ReadSpec" title="actin2.ReadSpec">actin2.ReadSpec</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="actin2.ACTIN.IndTable">
+<code class="sig-name descname">IndTable</code><a class="headerlink" href="#actin2.ACTIN.IndTable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Object containing the
+indices table.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#actin2.IndTable" title="actin2.IndTable">actin2.IndTable</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="actin2.ACTIN.ProcessSpec">
+<code class="sig-name descname">ProcessSpec</code><a class="headerlink" href="#actin2.ACTIN.ProcessSpec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Object to process the
+spectrum.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#actin2.ProcessSpec" title="actin2.ProcessSpec">actin2.ProcessSpec</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="actin2.ACTIN.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">files</span></em>, <em class="sig-param"><span class="n">indices</span></em>, <em class="sig-param"><span class="n">rv_in</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">obj_in</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">save_data</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">progress</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">verb</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">table_df</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">spec_kw</span></em><span class="sig-paren">)</span><a class="headerlink" href="#actin2.ACTIN.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run ACTIN for a list of files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>files</strong> (<em>list</em>) – List of fits files paths to be read.</p></li>
+<li><p><strong>indices</strong> (<em>list</em>) – List of indices identification (as in
+the indices table) to be calculated. If empty returns the fits headers only.</p></li>
+<li><p><strong>rv_in</strong> (<em>float</em><em>, </em><em>None</em>) – If float, use this RV value to
+shift spectrum to stellar rest frame, if None use RV value from fits file.</p></li>
+<li><p><strong>obj_in</strong> (<em>str</em><em>, </em><em>None</em>) – If not None, the target name from
+the fits file is overriden by this input.</p></li>
+<li><p><strong>progress</strong> (<em>bool</em>) – If True show progress bar.</p></li>
+<li><p><strong>table_df</strong> (<em>None</em><em>, </em><em>pd.DataFrame</em>) – Table with the indices parameters. If None use the built-in table.</p></li>
+<li><p><strong>verb</strong> (<em>bool</em>) – Activate verbose option.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Output pandas table.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="actin2.IndTable">
+<em class="property">class </em><code class="sig-prename descclassname">actin2.</code><code class="sig-name descname">IndTable</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">table_csv</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">verb</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#actin2.IndTable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to manipulate the indices table.</p>
+<blockquote>
+<div><dl class="simple">
+<dt>table_csv<span class="classifier">str</span></dt><dd><p>Path to the csv table with indices data. If ‘None’ use built-in table.</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py class">
+<dt id="actin2.ProcessSpec">
+<em class="property">class </em><code class="sig-prename descclassname">actin2.</code><code class="sig-name descname">ProcessSpec</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">spec</span></em>, <em class="sig-param"><span class="n">verb</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#actin2.ProcessSpec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process the spectrum</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="actin2.ReadSpec">
+<em class="property">class </em><code class="sig-prename descclassname">actin2.</code><code class="sig-name descname">ReadSpec</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em>, <em class="sig-param"><span class="n">obj_in</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">rv_in</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">verb</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">spec_kw</span></em><span class="sig-paren">)</span><a class="headerlink" href="#actin2.ReadSpec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extracts data from spectrograph fits files.</p>
+<dl class="py attribute">
+<dt id="actin2.ReadSpec.spectrum">
+<code class="sig-name descname">spectrum</code><a class="headerlink" href="#actin2.ReadSpec.spectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dictionary containing wavelength and flux</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="actin2.ReadSpec.header">
+<code class="sig-name descname">header</code><a class="headerlink" href="#actin2.ReadSpec.header" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dictionary containing selected headers from
+the fits file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p>New features:</p>
+<ul class="simple">
+<li><p>RON added to flux noise</p></li>
+<li><p>(BERV correction with barycorr)</p></li>
+<li><p>Extracts CCF profile (and Bisector)</p></li>
+</ul>
+<dl class="py method">
+<dt id="actin2.ReadSpec.plot">
+<code class="sig-name descname">plot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key_wave</span><span class="o">=</span><span class="default_value">'wave'</span></em>, <em class="sig-param"><span class="n">key_flux</span><span class="o">=</span><span class="default_value">'flux'</span></em>, <em class="sig-param"><span class="n">order</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ax</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">show</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">plt_kw</span></em><span class="sig-paren">)</span><a class="headerlink" href="#actin2.ReadSpec.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot spectrum.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key_wave</strong> (<em>str</em><em>, </em><em>option</em>) – Keyword for the wavelength array stored
+in <code class="docutils literal notranslate"><span class="pre">spectrum</span></code> dictionary.</p></li>
+<li><p><strong>key_flux</strong> (<em>str</em><em>, </em><em>option</em>) – Keyword for the flux array stored
+in <code class="docutils literal notranslate"><span class="pre">spectrum</span></code> dictionary.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="quickstart.html" class="btn btn-neutral float-left" title="Getting started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2021, J. Gomes da Silva
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
