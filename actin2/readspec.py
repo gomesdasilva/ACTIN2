@@ -29,7 +29,7 @@ class ReadSpec:
     # OPTIONAL:
     # TODO: Include barycorr.py!
 
-    def __init__(self, file, obj_in=None, verb=True, spec_class_in=None, **spec_kw):
+    def __init__(self, file, obj_in=None, verb=False, spec_class_in=None, **spec_kw):
         printif("Running ReadSpec", verb)
 
         # check if file exists:
