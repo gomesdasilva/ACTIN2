@@ -2,35 +2,26 @@ import sys, os
 import numpy as np
 import glob
 import pandas as pd
+from astropy.io import fits
 
 from ._spec_tools import printif, read_fits, read_headers, wave_star_rest_frame, wave_corr_berv
 
-from astropy.io import fits
-
-#from ._spec_tools import read_hdr_data
-#from ._spec_tools import printif
-#from ._spec_tools import wave_star_rest_frame
 
 
 spec_hdrs = dict(
-    obj = 'OBJECT',
-    instr = 'INSTRUME',
+    obj      = 'OBJECT',
+    instr    = 'INSTRUME',
     date_obs = 'DATE-OBS',
-    bjd = 'HIERARCH ESO QC BJD',
-    rv = 'HIERARCH ESO QC CCF RV', # Radial velocity [km/s]
-    rv_err = 'HIERARCH ESO QC CCF RV ERROR', # Uncertainty on radial velocity [m/s]
-    berv = 'HIERARCH ESO QC BERV', # [km/s]
-    fwhm = 'HIERARCH ESO QC CCF FWHM', # CCF FWHM [km/s] 
+    bjd      = 'HIERARCH ESO QC BJD',
+    rv       = 'HIERARCH ESO QC CCF RV', # Radial velocity [km/s]
+    rv_err   = 'HIERARCH ESO QC CCF RV ERROR', # Uncertainty on radial velocity [m/s]
+    berv     = 'HIERARCH ESO QC BERV', # [km/s]
+    fwhm     = 'HIERARCH ESO QC CCF FWHM', # CCF FWHM [km/s] 
     fwhm_err = 'HIERARCH ESO QC CCF FWHM ERROR', # Uncertainty on CCF FWHM [m/s?]
-    cont = 'HIERARCH ESO QC CCF CONTRAST', # CCF contrast [%]                
+    cont     = 'HIERARCH ESO QC CCF CONTRAST', # CCF contrast [%]                
     cont_err = 'HIERARCH ESO QC CCF CONTRAST ERROR', # CCF contrast error [%] 
-    bis = 'HIERARCH ESO QC CCF BIS SPAN', # CCF bisector span [km/s]     
-    bis_err = 'HIERARCH ESO QC CCF BIS SPAN ERROR', # CCF bisector span err
-
-
-    # for CCF
-    rv_step = 'HIERARCH ESO RV STEP', # Coordinate increment per pixel [km/s]
-    rv_ref_pix = 'HIERARCH ESO RV START', # Coordinate at reference pixel [km/s]
+    bis      = 'HIERARCH ESO QC CCF BIS SPAN', # CCF bisector span [km/s]     
+    bis_err  = 'HIERARCH ESO QC CCF BIS SPAN ERROR', # CCF bisector span err
 )
 
 # SP_HDRS = dict(
@@ -101,10 +92,6 @@ class ESPRESSO:
         # Get additional headers:
         if add_spec_hdrs:
             spec_hdrs.update(add_spec_hdrs)
-        # if add_ccf_hdrs:
-        #     ccf_hdrs.update(add_ccf_hdrs)
-        # if add_bis_hdrs:
-        #     bis_hdrs.update(add_bis_hdrs)
         
         flg = 'OK'
         instr = 'ESPRESSO'
@@ -141,6 +128,7 @@ class ESPRESSO:
             if key in ['rv', 'fwhm', 'bis', 'berv']:
                 headers[key] = headers[key]*1e3 # to m/s
 
+
         # shift wave to target rest frame:
         spec['wave'] = wave_star_rest_frame(spec['wave_raw'], headers['rv'])
 
@@ -158,10 +146,10 @@ class ESPRESSO:
 
             hdu = fits.open(ccf_file)
 
-            rv_ref = headers['rv_ref_pix']
-            rv_step = headers['rv_step']
+            rv_step = hdr['HIERARCH ESO RV STEP'] # [km/s]
+            rv_ref_pix = hdr['HIERARCH ESO RV START'] # [km/s]
 
-            rv_grid = np.array([rv_ref + i * rv_step for i in range(hdu[1].data[0].size)])
+            rv_grid = np.array([rv_ref_pix+ i * rv_step for i in range(hdu[1].data[0].size)])
 
             ccf_profile = dict(
                 rv          = rv_grid,
@@ -254,12 +242,14 @@ class ESPRESSO:
                 flux_raw = hdu[1].data['flux'], # debalzed
                 flux_err = hdu[1].data['error'],
                 wave_raw = hdu[1].data['wavelength_air'], # already in target rest frame
-        )
+                #wave_raw = hdu[1].data['wavelength'], # already in target rest frame
+            )
 
         elif hdr['HIERARCH ESO PRO CATG'] == 'S2D_A':
             spec = dict(
                 flux_raw = hdu[1].data, # blazed
                 flux_err = hdu[2].data,
+                #wave_raw = hdu[4].data, # not in stellar rest frame
                 wave_raw = hdu[5].data # wavelength air (bary)
             )
         

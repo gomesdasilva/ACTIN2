@@ -17,16 +17,16 @@ def wave_star_rest_frame(wave, rv):
     'wave' must be in the solar system baricentric frame."""
     c = 299792458.0 # [m/s]
     dwave = rv * wave / c
-    wave -= dwave
-    return wave
+    wave_corr = wave - dwave
+    return wave_corr
 
 
 def wave_corr_berv(wave, berv):
     """Change wavelength to solar system baricentric frame"""
     c = 299792458.0 # [m/s]
     dwave = - berv * wave / c
-    wave -= dwave
-    return wave
+    wave_corr = wave - dwave
+    return wave_corr
 
 
 def filter_headers(OUT_HDR_KEYS, all_hdr_dict):

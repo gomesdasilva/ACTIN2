@@ -56,7 +56,6 @@ class ReadSpec:
         else:
             # import class from module with names 'instr': the instrument class
             try:
-                #spectrograph = importlib.import_module(".spectrographs", f".{instr}").__getattribute__(instr)
                 spectrograph = importlib.import_module("." + instr, "actin2.spectrographs").__getattribute__(instr)
             except ModuleNotFoundError:
                 raise ModuleNotFoundError(f"*** ERROR: Instrument '{instr}' not detected in 'spectrographs'. Available instruments are: {spectrographs.__all__}")
@@ -87,7 +86,6 @@ class ReadSpec:
         spec = self.spec.spectrum
 
         if not ax:
-            import matplotlib.pylab as plt
             ax = plt
 
         if order and len(spec[key_flux].shape) == 2:
