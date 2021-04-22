@@ -5,7 +5,7 @@ import pandas as pd
 from scipy.interpolate import interp1d
 
 
-from actin2 import IndTable
+from indtable import IndTable
 from spectrographs._spec_tools import printif
 
 

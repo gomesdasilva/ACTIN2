@@ -37,7 +37,7 @@ import decorators
 
 
 # read fits file and return spectrum + selected headers
-class ReadSpec:
+class ReadSpec_v0:
     """
     Extracts data from spectrograph fits files.
 
@@ -54,9 +54,8 @@ class ReadSpec:
     """
     # REQUIRED:
     # TODO: Add option to save spectrum, CCF and BIS - connect to ACTIN class
-    # TODO 2: Add function to plot CCF Bisector
     # TODO 4: Add ESPRESSO 1D and 2D
-    # TODO 5: Read ASCII table (wave, flux, err) -> make new file/class in spectrographs
+    # TODO 5: Read ASCII table (wave, flux, err) -> Cam use data in CalcIndices directly
     # TODO 6: Add SPIRou
     # OPTIONAL:
     # TODO: Include barycorr.py!
@@ -175,7 +174,7 @@ class ReadSpec:
 #####
 
 
-class IndTable:
+class IndTable_v0:
     """
     Class to manipulate the indices table.
 
@@ -241,7 +240,9 @@ class IndTable:
 import tqdm
 import time
 
-from CalcIndex import CalcIndices
+from calcindices import CalcIndices
+from readspec import ReadSpec
+from indtable import IndTable
 
 from decorators import timeit
 
