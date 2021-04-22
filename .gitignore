@@ -1,0 +1,13 @@
+.DS_Store
+*.pyc
+*.o
+*.so
+*.png
+*.gif
+dist
+*.egg-info
+.syntastic_c_config
+.syntastic_cpp_config
+build
+*.cpp
+.coverage
