@@ -124,7 +124,7 @@ class ESPRESSO:
         headers['obj'] = self._get_target(hdr, instr, verb)
 
         # Get median SNR:
-        snr_med, _ = self._get_snr(hdr, instr)
+        snr_med, _ = self._get_snr(hdr)
         headers['snr_med'] = snr_med
 
         # if no instrument keyword is present in fits file:
@@ -225,8 +225,8 @@ class ESPRESSO:
         return obj
 
 
-    def _get_snr(self, hdr, instr):
-        i = 0
+    def _get_snr(self, hdr):
+        i = 1 # espresso orders start at 1
         snr_orders = []
         while True:
             try:
@@ -240,59 +240,6 @@ class ESPRESSO:
         
         return snr_med, snr_orders
 
-
-
-
-
-
-
-
-
-        for h in headers:
-            if h in ['rv', 'fwhm', 'bis', 'berv']:
-                headers[h] = headers[h]*1000
-
-        # shift wave to target rest frame:
-        spec['wave'] = wave_star_rest_frame(spec['wave_raw'], headers['rv'])
-
-        # TODO: add CCF profile
-
-
-        # import matplotlib.pylab as plt
-        # if 'S2D' in headers['ftype']:
-        #     plt.plot(spec['wave'][12], spec['flux_raw'][12], label="wave")
-        #     #plt.plot(spec['wave'][15], spec['flux_raw'][15], label="wave")
-        # if 'S1D' in headers['ftype']:
-        #     plt.plot(spec['wave'], spec['flux_raw'], label="flux_raw", marker='.')
-        #     #plt.plot(spec['wave'], spec['flux_cal'], label="flux_cal")
-        #     #plt.plot(spec['wave'], spec['flux_cal_skysub'], label='flux_cal_skysub')
-        #     #plt.plot(spec['wave_raw'], spec['flux_raw'], label="wave_raw")
-        # plt.legend(loc=1)
-
-        # from actin2 import IndTable
-        # df = IndTable().table
-        # ctr = df[df.ln_id == 'CaIIH'].ln_ctr.values[0]
-        # win = df[df.ln_id == 'CaIIH'].ln_win.values[0]
-        # plt.axvline(df[df.ln_id == 'CaIIH'].ln_ctr.values[0], c='k')
-        # plt.axvline(ctr - win, c='k', ls='--')
-        # plt.axvline(ctr + win, c='k', ls='--')
-
-        # plt.show()
-
-        # #print(hdr)
-        # sys.exit()
-
-
-        spec['flux'] = spec['flux_raw']
-        headers['spec_flg'] = 'OK'
-
-        max_RON = 8 # [e-/pix] from the pipeline manual, pag. 16
-        CONAD = 1.1 # [e-/ADU] from the pipeline manual, pag. 16
-        headers['ron'] = max_RON * CONAD
-
-        self.spectrum = spec
-        self.headers = headers
-        self._headers = headers
 
 
     def _read_fits_espresso(self, file=None, hdu=None):

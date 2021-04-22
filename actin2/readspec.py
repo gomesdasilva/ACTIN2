@@ -1,9 +1,10 @@
 import os
 import importlib
 import matplotlib.pylab as plt
+from astropy.io import fits
 
-import spectrographs
-from spectrographs._spec_tools import printif
+from . import spectrographs
+from .spectrographs._spec_tools import printif
 
 
 
@@ -39,7 +40,6 @@ class ReadSpec:
         printif(f"loaded file: {file}", verb)
 
         # Get instrument:
-        from astropy.io import fits
         hdu = fits.open(file)
         try:
             instr = hdu[0].header['INSTRUME']
@@ -56,7 +56,8 @@ class ReadSpec:
         else:
             # import class from module with names 'instr': the instrument class
             try:
-                spectrograph = importlib.import_module(f"spectrographs.{instr}").__getattribute__(instr)
+                #spectrograph = importlib.import_module(".spectrographs", f".{instr}").__getattribute__(instr)
+                spectrograph = importlib.import_module("." + instr, "actin2.spectrographs").__getattribute__(instr)
             except ModuleNotFoundError:
                 raise ModuleNotFoundError(f"*** ERROR: Instrument '{instr}' not detected in 'spectrographs'. Available instruments are: {spectrographs.__all__}")
 

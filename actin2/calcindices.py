@@ -5,8 +5,8 @@ import pandas as pd
 from scipy.interpolate import interp1d
 
 
-from indtable import IndTable
-from spectrographs._spec_tools import printif
+from .indtable import IndTable
+from .spectrographs._spec_tools import printif
 
 
 def spec_order(wave_2d, flux_2d, flux_2d_err, ln_ctr, ln_win, bandtype, type='dist', show_orders=False, verb=False):
@@ -196,8 +196,10 @@ class CalcIndices:
 
         val_err = np.sqrt(np.sum(F_num_err**2) + val**2 * np.sum(F_denum_err**2)) / (np.sum(F_denum))
 
-
-        r_neg_flux = np.mean(r_neg_flux) # mean ratio of negative flux to total flux in bands
+        if np.all(r_neg_flux) == np.zeros_like(r_neg_flux).all():
+            r_neg_flux = 0.0
+        else:
+            r_neg_flux = np.mean(r_neg_flux) # mean ratio of negative flux to total flux in bands
 
 
         data = {}
