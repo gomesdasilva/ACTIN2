@@ -11,6 +11,7 @@ from .readspec import ReadSpec
 from .indtable import IndTable
 
 
+# TODO: add option/class/function to plot lines from IntTable (with the bandpass)
 
 # TODO POST-PROCESSING: option to select HARPS-pre/HARPS-pos (option)
 # TODO POST-PROCESSING: add correction for CCF FWHM and contrast drift (option)?
@@ -86,6 +87,8 @@ class ACTIN:
 
 
         df = pd.DataFrame(actin)
+
+        # TODO: option to save rdb files
 
         if save_data:
             df.to_csv(save_data, index=False)
