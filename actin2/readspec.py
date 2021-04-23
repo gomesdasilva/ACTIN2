@@ -28,6 +28,7 @@ class ReadSpec:
     # TODO 6: Add SPIRou
     # OPTIONAL:
     # TODO: Include barycorr.py!
+    # TODO: add option to input RV and BERV!
 
     def __init__(self, file, obj_in=None, verb=False, spec_class_in=None, **spec_kw):
         printif("Running ReadSpec", verb)
