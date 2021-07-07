@@ -46,7 +46,8 @@ class ACTIN:
             obj_in (str, None) : If not None, the target name from 
                 the fits file is overriden by this input.
             progress (bool) : If True show progress bar.
-            table_df (None, pd.DataFrame) : Table with the indices parameters. If None use the built-in table.
+            table_df (None, pd.DataFrame) : Table with the indices parameters.
+                If None use the built-in table.
             verb (bool) : Activate verbose option.
         
         Returns:

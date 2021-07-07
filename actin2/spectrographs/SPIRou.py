@@ -5,17 +5,31 @@ import pandas as pd
 
 from astropy.io import fits
 
-from ._spec_tools import read_hdr_data
-from ._spec_tools import printif
-from ._spec_tools import wave_star_rest_frame
-from ._spec_tools import wave_corr_berv
+from ._spec_tools import printif, read_fits, read_headers, wave_star_rest_frame, wave_corr_berv
 
 
 
+# spec_hdrs_0 = dict(
+#     obj     = 'OBJECT',
+#     instr   = 'INSTRUME',
+#     exptime = 'EXPTIME', # [sec]
+#     gain = hdr['GAIN'], # [e-/ADU]
+#     rdnoise = hdr['RDNOISE'], # [e-]
+#     pi_name = hdr['PI_NAME'],
+#     run_id = hdr['RUNID'],
+#     date_obs = hdr['DATE-OBS'] + 'T' + hdr['UTIME'],
+#     ra = hdr['RA_DEG'],
+#     dec = hdr['DEC_DEG'],
+#     airmass = hdr['AIRMASS'], # airmass at start
+#     drs_ver = hdr['VERSION'],
+# )
 
-SP_HDRS = dict(
+# spec_hdrs_1 = dict(
+#     bjd = 'BJD',
+#     berv = 'BERV', # [km/s]
+#     snr25 = 'SNR25'
+# )
 
-)
 
 
 class SPIRou:
@@ -32,40 +46,48 @@ class SPIRou:
 
     # TODO: Include 2D spectra
 
-    def __init__(self, file, hdu, obj_in, rv_in, verb, **spec_kw):
+    def __init__(self, file, hdu, obj_in=None, verb=False):
         printif("Running SPIRou", verb)
 
         spec, headers = self.read_spec_spirou(file, hdu)
 
-        # correct barycentric motion (Etienne in email)
+        # correct barycentric motion (Etienne in email, s files)
         spec['wave_raw'] = wave_corr_berv(spec['wave_raw'], headers['berv'])
 
-        # shift wave to target rest frame: (Etienne in email)
+        #print(headers['rv'])
+
+        # shift wave to target rest frame: (Etienne in email, s files)
         try:
             spec['wave'] = wave_star_rest_frame(spec['wave_raw'], headers['rv'])
         except KeyError:
             try:
                 spec['wave'] = wave_star_rest_frame(spec['wave_raw'], headers['targ_rv'])
             except KeyError:
-                print("WARNING: wavelength not shifted to target rest frame")
+                printif("WARNING: wavelength not shifted to target rest frame", verb)
 
-        headers['ron'] = headers['gain'] * headers['rdnoise']
+        headers['noise'] = headers['gain'] * headers['rdnoise']
+
+        spec['flux_err'] = np.sqrt(abs(spec['flux_raw']))
+        # print(spec['flux_err'][40][:]) #! gives nan??
+
+        # print(spec['flux_err'])
+
+        # sys.exit()
 
         try:
             spec['flux'] = spec['flux_tell_corr']
         except KeyError:
             try:
-                print("Flux was deblazed")
-                spec['flux'] = spec['flux_wave']/spec['blaze']
+                spec['flux'] = spec['flux_raw']/spec['blaze']
+                #print("Flux was deblazed")
             except KeyError:
-                print("Flux was NOT debalzed")
                 spec['flux'] = spec['flux_raw']
+                #print("Flux was NOT debalzed")
 
 
 
         self.spectrum = spec
         self.headers = headers
-        self._headers = headers
 
         #sys.exit()
 
@@ -77,12 +99,12 @@ class SPIRou:
         else:
             hdu = fits.open(file)
 
-        print(file)
+        #print(file)
         #sys.exit()
 
-        print(hdu.info())
+        #print(hdu.info())
         #sys.exit()
-        print(hdu[0].header)
+        #print(hdu[0].header)
         #sys.exit()
 
         if hdu[1].header['EXTNAME'] == 'UniformWavelength':
@@ -101,6 +123,7 @@ class SPIRou:
             )
 
         hdr = hdu[0].header
+        print(hdu.info())
 
         headers = dict(
             obj = hdr['OBJECT'],
@@ -123,18 +146,35 @@ class SPIRou:
         )
 
         try:
-            headers['targ_rv'] = hdr['OBJRV'] * 1000 # [m/s]
+            headers['targ_rv'] = hdr['OBJRV'] * 1e3 # [m/s]
         except KeyError:
             pass
 
+        # get the CCF file:
         filename = hdr['FILENAME'][:-1] + "v.fits"
 
         file_v = os.path.join(os.path.dirname(file), filename)
 
+        #* Make try statement:
         hdu = fits.open(file_v)
+        print(hdu.info())
+        print(hdu['CCF'].header) #! CCF data
+        print(hdu['CCF'].data.names)
+
+        ccf_rv = np.zeros(len(hdu['CCF'].data))
+        ccf_profile = np.zeros(len(hdu['CCF'].data))
+        for i, data in enumerate(hdu['CCF'].data):
+            ccf_rv[i] = data['Velocity']
+            ccf_profile[i] = data['combined']
+
+        spec['ccf_rv'] = ccf_rv
+        spec['ccf_profile'] = ccf_profile
 
         try:
-            headers['rv'] = hdu[1].header['CCFRVC'] * 1000
+            headers['rv'] = hdu[0].header['CCFRVC'] * 1e3
+            headers['rv_phn'] = hdu[0].header['DVRMS']
+            headers['fwhm'] = hdu[0].header['CCFFWHM'] * 1e3
+            headers['cont'] = hdu[0].header['CCFCONT']
         except KeyError:
             print("ERROR: No 'CCFRVC' header on hdu[1]")
 

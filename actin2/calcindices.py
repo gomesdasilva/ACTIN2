@@ -84,7 +84,6 @@ class CalcIndices:
     # TODO: add the above functions to the class?
     # TODO: Try to separate total noise from photon noise and RON
 
-
     def __init__(self, spec, indices, step=1e-6, table_df=None, plot_lines=False, full_output=False, interp=True, verb=False):
 
         data = spec.headers
@@ -132,7 +131,7 @@ class CalcIndices:
 
         printif("Running CalcIndex", verb)
 
-        if not table_df:
+        if table_df is None:
             ind_table = IndTable().table
         else:
             ind_table = table_df

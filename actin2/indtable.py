@@ -21,7 +21,7 @@ class IndTable:
         if not table_csv:
             table_csv = os.path.join(os.path.dirname(__file__), "actin_table.csv")
 
-        self.table = pd.read_csv(table_csv)
+        self.table = pd.read_csv(table_csv, index_col=False)
         
         self.indices = np.unique(self.table.ind_id)
         self.params = list(self.table.keys())

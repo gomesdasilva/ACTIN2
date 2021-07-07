@@ -2,6 +2,7 @@
 
 
 # Not used:
+# HARPS
 def get_headers():
     obs = 'ESO'
 
@@ -75,3 +76,19 @@ def get_target(hdr):
 
     return obj
 
+
+# SPIROU
+spec_hdrs_0 = dict(
+    obj     = 'OBJECT',
+    instr   = 'INSTRUME',
+    exptime = 'EXPTIME', # [sec]
+    gain = hdr['GAIN'], # [e-/ADU]
+    rdnoise = hdr['RDNOISE'], # [e-]
+    pi_name = hdr['PI_NAME'],
+    run_id = hdr['RUNID'],
+    date_obs = hdr['DATE-OBS'] + 'T' + hdr['UTIME'],
+    ra = hdr['RA_DEG'],
+    dec = hdr['DEC_DEG'],
+    airmass = hdr['AIRMASS'], # airmass at start
+    drs_ver = hdr['VERSION'],
+)

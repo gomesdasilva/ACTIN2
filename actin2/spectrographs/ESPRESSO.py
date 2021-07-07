@@ -241,15 +241,13 @@ class ESPRESSO:
             spec = dict(
                 flux_raw = hdu[1].data['flux'], # debalzed
                 flux_err = hdu[1].data['error'],
-                wave_raw = hdu[1].data['wavelength_air'], # already in target rest frame
-                #wave_raw = hdu[1].data['wavelength'], # already in target rest frame
+                wave_raw = hdu[1].data['wavelength_air'],
             )
 
         elif hdr['HIERARCH ESO PRO CATG'] == 'S2D_A':
             spec = dict(
                 flux_raw = hdu[1].data, # blazed
                 flux_err = hdu[2].data,
-                #wave_raw = hdu[4].data, # not in stellar rest frame
                 wave_raw = hdu[5].data # wavelength air (bary)
             )
         

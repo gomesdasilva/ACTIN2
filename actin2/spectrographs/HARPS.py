@@ -5,8 +5,12 @@ import pandas as pd
 
 from ._spec_tools import printif, read_fits, read_headers, wave_star_rest_frame, wave_corr_berv
 
-
-
+"""
+IMPORTANT NOTE: RV error is quaadratic sum of:
+HIERARCH ESO DRS CAL TH ERROR [m/s]
+HIERARCH ESO DRS CCF NOISE [km/s]
+HIERARCH ESO DRS DRIFT NOISE [m/s]
+"""
 obs = 'ESO'
 
 spec_hdrs = dict(
@@ -14,15 +18,26 @@ spec_hdrs = dict(
     instr      = 'INSTRUME',
     date_obs   = 'DATE-OBS',
     bjd        = f'HIERARCH {obs} DRS BJD',
+    drs        = f'HIERARCH {obs} DRS VERSION',
+    exptime    = f'EXPTIME',
+    ra       = 'RA',
+    dec      = 'DEC',
+    snr7     = f'HIERARCH {obs} DRS SPE EXT SN{7}',
+    snr50    = f'HIERARCH {obs} DRS SPE EXT SN{50}',
+    prog_id  = f'HIERARCH {obs} OBS PROG ID',
+    pi_coi   = f'HIERARCH {obs} OBS PI-COI NAME',
+    cal_th_err = f'HIERARCH {obs} DRS CAL TH ERROR', # estim err on wave sol(m/s)
 )
 
 ccf_hdrs = dict(
     rv          = f"HIERARCH {obs} DRS CCF RVC",     # [km/s] (drift corrected)
-    rv_err      = f"HIERARCH {obs} DRS DVRMS",       # [m/s]
+    dvrms       = f"HIERARCH {obs} DRS DVRMS",       # [m/s]
     berv        = f"HIERARCH {obs} DRS BERV",        # [km/s]
     ccf_noise   = f'HIERARCH {obs} DRS CCF NOISE',   # [km/s] Photon noise on CCF RV
     fwhm        = f'HIERARCH {obs} DRS CCF FWHM',    # [km/s]
     cont        = f'HIERARCH {obs} DRS CCF CONTRAST', # [%]
+    mask        = f"HIERARCH {obs} DRS CCF MASK",
+    drift_noise = f'HIERARCH {obs} DRS DRIFT NOISE' # Th Drift photon noise [m/s]
 )
 
 bis_hdrs = dict(
@@ -76,6 +91,7 @@ class HARPS:
 
         # Get spectrum and file headers:
         spec['wave_raw'], spec['flux_raw'], hdr = read_fits(hdu=hdu, instr=instr)
+
 
         # Get spectrum selected header values:
         headers = read_headers(hdr, spec_hdrs, data=None)
@@ -166,6 +182,8 @@ class HARPS:
         sigdet = hdr['HIERARCH ESO DRS CCD SIGDET'] #CCD Readout Noise [e-] 
         gain = hdr['HIERARCH ESO DRS CCD CONAD']  #CCD conversion factor [e-/ADU]
         headers['noise'] = sigdet * gain # Read-Out-Noise per pixel
+
+        headers['rv_err'] = np.sqrt(headers['ccf_noise']**2 + headers['drift_noise']**2 + headers['cal_th_err']**2)
 
         headers['spec_flg'] = flg
 
