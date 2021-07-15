@@ -120,7 +120,7 @@ class HARPS:
         # CCF profile data:
         if get_ccf:
             printif("Reading CCF file", verb)
-            ccf_file, _ = self._search_file(file, type='ccf', verb=False)
+            ccf_file, _ = self._search_file(file, headers['ftype'], type='ccf', verb=False)
 
         if get_ccf and ccf_file:
             ccf_profile = dict()
@@ -139,7 +139,7 @@ class HARPS:
         # CCF bisector data:
         if get_bis:
             printif("Reading BIS file", verb)
-            bis_file, _ = self._search_file(file, type='bis', verb=False)
+            bis_file, _ = self._search_file(file, headers['ftype'], type='bis', verb=False)
 
         if get_bis and bis_file:
             ccf_bisector = dict()
@@ -270,8 +270,8 @@ class HARPS:
         return snr_med, snr_orders
 
 
-    def _search_file(self, fits_file, type='ccf', verb=True):
-        info = os.path.basename(fits_file).split('_')[0]
+    def _search_file(self, fits_file, ftype, type='ccf', verb=True):
+        info = os.path.basename(fits_file).split(f'_{ftype}')[0]
         path = os.path.dirname(fits_file)
         search_string = os.path.join(path, f"{info}_{type}_*_A.fits")
 

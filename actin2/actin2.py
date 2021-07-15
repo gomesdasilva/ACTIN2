@@ -82,7 +82,7 @@ class ACTIN:
 
             data = calc_ind.data
 
-            data['actin_ver'] = '2.0.0'
+            data['actin_ver'] = '2.0.1'
 
             actin.append(data)
 
