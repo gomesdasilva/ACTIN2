@@ -120,6 +120,7 @@ class CalcIndices:
 
 
                 for index in indices:
+                    printif(f" Computing {index}", verb=verb)
                     index_dict = self.calc_index(wave, flux, flux_err, noise, index, step, table_df, plot_lines, full_output, interp, verb)
 
                     data.update(index_dict)
@@ -136,7 +137,7 @@ class CalcIndices:
         else:
             ind_table = table_df
 
-        assert index in ind_table.ind_id.values, f"CalcIndex ERROR: {index} is not available in indices table"
+        assert index in ind_table.ind_id.values, f"*** ERROR: {index} is not available in indices table"
 
         # get index from ind_table:
         df = ind_table[ind_table.ind_id == index]
@@ -213,7 +214,7 @@ class CalcIndices:
 
 
     
-    def inter_flux_band(self, wave, flux, flux_err, noise, ctr, win, bandtype, step, make_plot=False, interp=False):
+    def inter_flux_band(self, wave, flux, flux_err, noise, ctr, win, bandtype, step, show_plot=False, interp=True):
         """Calculate average flux in bandpass.
         
         Interpolates between the limiting pixels and the bandpass limits to deal with the finite spectrograph resolution."""
@@ -241,6 +242,7 @@ class CalcIndices:
 
             mask = (wave >= wmin) & (wave <= wmax)
 
+            # wavelength right before and after the window limits:
             wave_int_low = (wave[wave < wmin][-1], wave[wave >= wmin][0])
             wave_int_high = (wave[wave <= wmax][-1], wave[wave > wmax][0])
 
@@ -257,10 +259,10 @@ class CalcIndices:
             interp_high= interp1d(wave_high, array_high, kind='linear', fill_value="extrapolate")
 
 
-            wave_i_low = np.arange(min(wave_low), max(wave_low), step)
+            wave_i_low = np.arange(min(wave_low), max(wave_low) + step, step)
             array_i_low = interp_low(wave_i_low)
 
-            wave_i_high = np.arange(min(wave_high), max(wave_high), step)
+            wave_i_high = np.arange(min(wave_high), max(wave_high) + step, step)
             array_i_high = interp_high(wave_i_high)
 
             # wave_i = np.r_[wave_i_low, wave[mask], wave_i_high]
@@ -272,6 +274,7 @@ class CalcIndices:
 
             mask_low = (wave_i_low >= wmin)
             mask_high = (wave_i_high <= wmax)
+
             wave_i = np.r_[min(wave_i_low[mask_low]), wave[mask], max(wave_i_high[mask_high])]
             array_i = np.r_[array_i_low[mask_low][0], array[mask], array_i_high[mask_high][-1]]
 
@@ -296,7 +299,7 @@ class CalcIndices:
             bp_mask = (wave_i >= ctr - win/2) & (wave_i <= ctr + win/2)
             bp_i = np.where(bp_mask, 1, 0.0)
 
-        if make_plot:
+        if show_plot:
             plt.plot(wave, flux, 'k-', lw=0.7, alpha=0.5)
             plt.plot(wave_i, flux_i, 'k-', lw=1)
             plt.plot(wave_i, flux_i.max()*bp_i, 'b--', lw=0.7, label='bandpass')

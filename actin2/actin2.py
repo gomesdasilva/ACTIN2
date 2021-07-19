@@ -74,6 +74,9 @@ class ACTIN:
             time.sleep(0.01)
             read_spec = self.ReadSpec(file, verb=verb, **spec_kw)
 
+            if not read_spec.spec.spectrum:
+                continue
+
             if not indices:
                 return pd.DataFrame([read_spec.spec.headers])
 
@@ -82,7 +85,8 @@ class ACTIN:
 
             data = calc_ind.data
 
-            data['actin_ver'] = '2.0.1'
+            # TODO: make function to read version from VERSION
+            data['actin_ver'] = '2.0.0 beta 3'
 
             actin.append(data)
 

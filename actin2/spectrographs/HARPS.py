@@ -136,6 +136,12 @@ class HARPS:
 
             self.ccf_profile = ccf_profile
 
+        elif not ccf_file:
+            printif(f"*** ERROR: Spectrum {file} ignored.", verb=verb)
+            self.spectrum = None
+            self.headers = headers
+            return
+
         # CCF bisector data:
         if get_bis:
             printif("Reading BIS file", verb)
