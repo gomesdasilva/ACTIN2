@@ -271,13 +271,11 @@ class HARPS:
 
 
     def _search_file(self, fits_file, ftype, type='ccf', verb=True):
-        #info = os.path.basename(fits_file).split(f'_{ftype}')[0]
-        info = os.path.basename(fits_file).split(f':')[0]
+        info = os.path.basename(fits_file).split(f'_{ftype}')[0]
         path = os.path.dirname(fits_file)
         search_string = os.path.join(path, f"{info}_{type}_*_A.fits")
 
         file = glob.glob(search_string)
-        print(file)
 
         flg = "OK"
 
