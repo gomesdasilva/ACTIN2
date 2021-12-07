@@ -29,6 +29,7 @@ class ReadSpec:
     # OPTIONAL:
     # TODO: Include barycorr.py!
     # TODO: add option to input RV and BERV!
+    # TODO: Add option to retrieve spectra without being at rest frame!
 
     def __init__(self, file, obj_in=None, verb=False, spec_class_in=None, **spec_kw):
         printif("Running ReadSpec", verb)
@@ -45,9 +46,12 @@ class ReadSpec:
         try:
             instr = hdu[0].header['INSTRUME']
         except KeyError:
-            for instrument in spectrographs.__all__:
-                if instrument in os.path.basename(file):
-                    instr = instrument
+            try:
+                instr = hdu[0].header['HIERARCH ESO OBS INSTRUMENT']
+            except KeyError:
+                for instrument in spectrographs.__all__:
+                    if instrument in os.path.basename(file):
+                        instr = instrument
 
         printif(f"loaded instr: {instr}", verb)
 
@@ -75,7 +79,7 @@ class ReadSpec:
 
 
 
-    def plot(self, key_wave='wave', key_flux='flux', order=None, ax=None, show=False, **plt_kw):
+    def plot_spec(self, key_wave='wave', key_flux='flux', order=None, ax=None, show=False, **plt_kw):
         """Plot spectrum.
 
         Args:

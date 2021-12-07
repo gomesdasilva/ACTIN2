@@ -101,3 +101,30 @@ class ACTIN:
 
         return df
 
+
+    # TODO: Finish this function
+    # TODO: Enable 2D spectrum
+    def plot_index_lines(self, file, index):
+        read_spec = self.ReadSpec(file)
+        
+        table = self.IndTable().table
+        ind_tab = table[table.ind_id == index]
+        ind_vars = ind_tab.ind_var.values
+        print(ind_vars)
+        fig, axes = plt.subplots(nrows=1, ncols=len(ind_vars), figsize=(4*len(ind_vars), 4))
+        for ind_var, ax in zip(ind_vars, axes):
+            ctr = ind_tab[ind_tab.ind_var==ind_var].ln_ctr.values[0]
+            win = ind_tab[ind_tab.ind_var==ind_var].ln_win.values[0]
+            bt = ind_tab[ind_tab.ind_var==ind_var].bandtype.values[0]
+
+            if bt == 'sq': win /= 2
+
+            read_spec.plot_spec(show=False, ax=ax)
+
+            ax.axvline(ctr, color='k', ls=':', lw=0.7)
+            ax.axvline(ctr - win, color='k', ls='--', lw=0.7)
+            ax.axvline(ctr + win, color='k', ls='--', lw=0.7)
+            ax.set_xlim(ctr - win - 2, ctr + win + 2)
+
+        plt.tight_layout()
+        plt.show()

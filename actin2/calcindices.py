@@ -313,6 +313,6 @@ class CalcIndices:
             plt.show()
 
         flux_band = sum(flux_i * bp_i)/win
-        flux_band_var= sum((flux_err_i**2 + noise*2) * bp_i**2)/win**2
+        flux_band_var= sum((flux_err_i**2 + noise**2) * bp_i**2)/win**2
 
         return flux_band, np.sqrt(flux_band_var), r_neg_ln

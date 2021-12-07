@@ -70,7 +70,7 @@ def read_fits(fits_file=None, hdu=None, instr=None, calc_x=True):
     hdu.close()
 
     if calc_x:
-        if instr == 'HARPS':
+        if instr in ['HARPS', 'CORALIE']:
             obs = 'ESO'
         if instr == 'HARPN':
             obs = 'TNG'

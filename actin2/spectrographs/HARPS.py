@@ -27,6 +27,7 @@ spec_hdrs = dict(
     prog_id  = f'HIERARCH {obs} OBS PROG ID',
     pi_coi   = f'HIERARCH {obs} OBS PI-COI NAME',
     cal_th_err = f'HIERARCH {obs} DRS CAL TH ERROR', # estim err on wave sol(m/s)
+    berv        = f"HIERARCH {obs} DRS BERV",        # [km/s]
 )
 
 ccf_hdrs = dict(
@@ -92,7 +93,6 @@ class HARPS:
         # Get spectrum and file headers:
         spec['wave_raw'], spec['flux_raw'], hdr = read_fits(hdu=hdu, instr=instr)
 
-
         # Get spectrum selected header values:
         headers = read_headers(hdr, spec_hdrs, data=None)
 
@@ -138,7 +138,7 @@ class HARPS:
 
         elif not ccf_file:
             printif(f"*** ERROR: Spectrum {file} ignored.", verb=verb)
-            self.spectrum = None
+            self.spectrum = spec
             self.headers = headers
             return
 
@@ -156,8 +156,10 @@ class HARPS:
 
             self.ccf_bisector = ccf_bisector
 
-
+        
         # Calibrate wavelength to stellar rest frame:
+        # TODO: star_rest_frame and corr_berv should not be dependent on ccf file
+        # TODO: should have option to get spectrum without star rest frame
         if get_ccf and ccf_file:
             rv = headers['rv']
             if headers['ftype'] == 's1d' and not np.isnan(rv):
@@ -167,6 +169,7 @@ class HARPS:
                 spec['wave'] = wave_corr_berv(spec['wave_raw'], headers['berv'])
                 spec['wave'] = wave_star_rest_frame(spec['wave'], rv)
         else:
+            # TODO: add option to input low precision RV (IMPORTANT!)
             rv = np.nan
             flg = "WaveNotCorr"
             printif("*** WARNING: Cannot shift spectrum to target rest frame", verb)
@@ -185,6 +188,7 @@ class HARPS:
             spec['flux'], flg = self._deblaze(file, spec['flux_raw'], blaze_file, flg, instr)
 
 
+        
         sigdet = hdr['HIERARCH ESO DRS CCD SIGDET'] #CCD Readout Noise [e-] 
         gain = hdr['HIERARCH ESO DRS CCD CONAD']  #CCD conversion factor [e-/ADU]
         headers['noise'] = sigdet * gain # Read-Out-Noise per pixel
