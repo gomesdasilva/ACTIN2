@@ -1,5 +1,6 @@
-# ACTIN 2 is comming
+# ACTIN 2
 
-Warning: This version is not finished. Do not use it (yet).
+Beta version. In development.
 
-If you need to extract activity indices now, use the ACTIN 1.3.7 version at https://github.com/gomesdasilva/ACTIN
+
+Some tutorials: https://github.com/gomesdasilva/ACTIN2/tree/master/docs/_static/notebooks
