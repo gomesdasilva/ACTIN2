@@ -12,6 +12,20 @@ class IndTable:
     -----------
         table_csv : str
             Path to the csv table with indices data. If 'None' use built-in table.
+
+
+    E.g.:
+        HaLW = dict(
+            ind_id = 'I_HaWings',
+            ind_var = 'L1',
+            ln_id = 'HaLW',
+            ln_c = 1.0,
+            ln_ctr = halw_ctr,
+            ln_win = haw_win,
+            bandtype = 'sq'
+        )
+        new_tab = actin.IndTable()
+        new_tab.add_line(**HaLW)
     """
 
     def __init__(self, table_csv=None, verb=False):

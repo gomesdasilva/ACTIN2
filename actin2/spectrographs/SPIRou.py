@@ -65,7 +65,7 @@ class SPIRou:
             except KeyError:
                 printif("WARNING: wavelength not shifted to target rest frame", verb)
 
-        headers['noise'] = headers['gain'] * headers['rdnoise']
+        #headers['noise'] = headers['gain'] * headers['rdnoise']
 
         spec['flux_err'] = np.sqrt(abs(spec['flux_raw']))
         # print(spec['flux_err'][40][:]) #! gives nan??
@@ -107,6 +107,8 @@ class SPIRou:
         #print(hdu[0].header)
         #sys.exit()
 
+        spec = dict()
+
         if hdu[1].header['EXTNAME'] == 'UniformWavelength':
             spec = dict(
                 wave_raw = hdu[1].data.field(0) * 10, # to ang
@@ -123,7 +125,7 @@ class SPIRou:
             )
 
         hdr = hdu[0].header
-        print(hdu.info())
+        #print(hdu[1].header[:10])#;sys.exit()
 
         headers = dict(
             obj = hdr['OBJECT'],
@@ -139,7 +141,7 @@ class SPIRou:
             airmass = hdr['AIRMASS'], # airmass at start
             drs_ver = hdr['VERSION'],
 
-            snr25 = hdu[1].header['SNR25'], # snr at order 25
+            #snr25 = hdu[1].header['SNR25'], # snr at order 25
 
             berv = hdu[1].header["BERV"] * 1000,
             bjd = hdu[1].header['BJD'],
@@ -157,9 +159,9 @@ class SPIRou:
 
         #* Make try statement:
         hdu = fits.open(file_v)
-        print(hdu.info())
-        print(hdu['CCF'].header) #! CCF data
-        print(hdu['CCF'].data.names)
+        #print(hdu.info())
+        #print(hdu['CCF'].header) #! CCF data
+        #print(hdu['CCF'].data.names)
 
         ccf_rv = np.zeros(len(hdu['CCF'].data))
         ccf_profile = np.zeros(len(hdu['CCF'].data))
@@ -169,6 +171,8 @@ class SPIRou:
 
         spec['ccf_rv'] = ccf_rv
         spec['ccf_profile'] = ccf_profile
+
+        #headers['rv'] = hdu[0].header['CCFRVC'] * 1e3
 
         try:
             headers['rv'] = hdu[0].header['CCFRVC'] * 1e3

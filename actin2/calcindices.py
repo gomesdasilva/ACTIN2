@@ -206,6 +206,13 @@ class CalcIndices:
         data[index] = val
         data[index + '_err'] = val_err
         data[index + '_mrneg'] = r_neg_flux
+        
+        # add individual fluxes to output
+        for n, fi in enumerate(F_num):
+            data[index + 'F' + str(n+1)] = fi
+        for n, fi in enumerate(F_denum):
+            data[index + 'R' + str(n+1)] = fi
+        
 
         if full_output:
             data.update(lines)
@@ -316,3 +323,6 @@ class CalcIndices:
         flux_band_var= sum((flux_err_i**2 + noise**2) * bp_i**2)/win**2
 
         return flux_band, np.sqrt(flux_band_var), r_neg_ln
+
+
+

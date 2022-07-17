@@ -7,6 +7,44 @@ from . import spectrographs
 from .spectrographs._spec_tools import printif
 
 
+# TODO: incorporate this function into ReadSpec for diagnostic
+def spec_ha_quality_check(file):
+    """Compare flux in centre of Halpha line to that of the wings to check if line is centred at rest frame and if is in emission or absorption.
+
+    Uses ACTIN 2 to obtain spectrum from fits file.
+
+    Args:
+        file (str): fits file path.
+    
+    Returns:
+        (str): "Absorption", "emission", or "BAD".
+    """
+    spec = actin.ReadSpec(file).spec
+    w = spec.spectrum['wave']
+    f = spec.spectrum['flux']
+
+    indtab = actin.IndTable().table
+    ctr = indtab[indtab.ln_id=='Ha06'].ln_ctr.values[0]
+
+    mask = (w >= ctr - 0.6/2) & (w <= ctr + 0.6/2)
+    f06 = np.sum(f[mask])
+    mask = (w >= ctr - 1.6/2) & (w <= ctr - 0.6/2)
+    f16r = np.sum(f[mask])
+    mask = (w >= ctr + 0.6/2) & (w <= ctr + 1.6/2)
+    f16l = np.sum(f[mask])
+
+    #print(f16l, f06, f16r)
+    absorption = (f06 < f16l) & (f06 < f16r)
+    emission = (f06 > f16l) & (f06 > f16r)
+
+    if absorption:
+        return "absorption"
+    elif emission:
+        return "emission"
+    else:
+        return "BAD"
+
+
 
 
 class ReadSpec:
@@ -27,9 +65,9 @@ class ReadSpec:
     # REQUIRED:
     # TODO 6: Add SPIRou
     # OPTIONAL:
-    # TODO: Include barycorr.py!
-    # TODO: add option to input RV and BERV!
-    # TODO: Add option to retrieve spectra without being at rest frame!
+    # TODO: Include barycorr.py
+    # TODO: add option to input RV and BERV
+    # TODO: [DONE] Add option to retrieve spectra without being at rest frame
 
     def __init__(self, file, obj_in=None, verb=False, spec_class_in=None, **spec_kw):
         printif("Running ReadSpec", verb)

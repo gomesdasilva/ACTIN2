@@ -135,9 +135,9 @@ class ESPRESSO:
         spec['flux'] = spec['flux_raw']
         headers['spec_flg'] = 'OK'
 
-        max_RON = 8 # [e-/pix] from the pipeline manual, pag. 16
-        CONAD = 1.1 # [e-/ADU] from the pipeline manual, pag. 16
-        headers['noise'] = max_RON * CONAD
+        # max_RON = 8 # [e-/pix] from the pipeline manual, pag. 16
+        # CONAD = 1.1 # [e-/ADU] from the pipeline manual, pag. 16
+        # headers['noise'] = max_RON * CONAD
 
         # CCF profile data:
         if get_ccf:

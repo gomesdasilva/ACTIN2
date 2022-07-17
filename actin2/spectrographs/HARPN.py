@@ -14,12 +14,14 @@ spec_hdrs = dict(
     instr      = 'INSTRUME',
     date_obs   = 'DATE-OBS',
     bjd        = f'HIERARCH {obs} DRS BJD',
+    targ_rv   = f'HIERARCH {obs} TEL TARG RADVEL',  # [km/s]
+    berv        = f"HIERARCH {obs} DRS BERV",        # [km/s]
 )
 
 ccf_hdrs = dict(
     rv          = f"HIERARCH {obs} DRS CCF RVC",     # [km/s] (drift corrected)
     rv_err      = f"HIERARCH {obs} DRS DVRMS",       # [m/s]
-    berv        = f"HIERARCH {obs} DRS BERV",        # [km/s]
+    #berv        = f"HIERARCH {obs} DRS BERV",        # [km/s]
     ccf_noise   = f'HIERARCH {obs} DRS CCF NOISE',   # [km/s] Photon noise on CCF RV
     fwhm        = f'HIERARCH {obs} DRS CCF FWHM',    # [km/s]
     cont        = f'HIERARCH {obs} DRS CCF CONTRAST', # [%]
@@ -113,11 +115,14 @@ class HARPN:
 
             headers = read_headers(ccf_hdr, ccf_hdrs, data=headers)
 
-            for key in headers.keys():
-                if key in ['rv', 'berv', 'ccf_noise', 'fwhm']:
-                    headers[key] *= 1e3 # to m/s
-
             self.ccf_profile = ccf_profile
+
+
+        keys = ['rv', 'berv', 'ccf_noise', 'fwhm', 'targ_rv']
+        for key in keys:
+            if key in headers:
+                headers[key] *= 1e3 # to m/s
+
 
         # CCF bisector data:
         if get_bis:
@@ -134,19 +139,35 @@ class HARPN:
             self.ccf_bisector = ccf_bisector
 
 
-        # Calibrate wavelength to stellar rest frame:
-        if get_ccf and ccf_file:
-            rv = headers['rv']
-            if headers['ftype'] == 's1d' and not np.isnan(rv):
-                spec['wave'] = wave_star_rest_frame(spec['wave_raw'], rv)
-
-            elif headers['ftype'] == 'e2ds' and not np.isnan(rv) and 'berv' in headers:
-                spec['wave'] = wave_corr_berv(spec['wave_raw'], headers['berv'])
-                spec['wave'] = wave_star_rest_frame(spec['wave'], rv)
+        if 'rv' not in headers.keys():
+            rv = headers['targ_rv']
         else:
-            rv = np.nan
+            rv = headers['rv']
+
+        # Calibrate wavelength to stellar rest frame:
+        if headers['ftype'] == 's1d' and not file.endswith("_rv.fits"):
+            spec['wave'] = wave_star_rest_frame(spec['wave_raw'], rv)
+        elif headers['ftype'] == 's1d' and file.endswith("_rv.fits"):
+            spec['wave'] = spec['wave_raw']
+        elif headers['ftype'] == 'e2ds' and 'berv' in headers:
+            spec['wave'] = wave_corr_berv(spec['wave_raw'], headers['berv'])
+        else:
             flg = "WaveNotCorr"
             printif("*** WARNING: Cannot shift spectrum to target rest frame", verb)
+
+
+        # if get_ccf and ccf_file:
+        #     rv = headers['rv']
+        #     if headers['ftype'] == 's1d' and not np.isnan(rv):
+        #         spec['wave'] = wave_star_rest_frame(spec['wave_raw'], rv)
+
+        #     elif headers['ftype'] == 'e2ds' and not np.isnan(rv) and 'berv' in headers:
+        #         spec['wave'] = wave_corr_berv(spec['wave_raw'], headers['berv'])
+        #         spec['wave'] = wave_star_rest_frame(spec['wave'], rv)
+        # else:
+        #     rv = np.nan
+        #     flg = "WaveNotCorr"
+        #     printif("*** WARNING: Cannot shift spectrum to target rest frame", verb)
 
         # Flux photon noise:
         spec['flux_err'] = np.sqrt(abs(spec['flux_raw']))
@@ -162,9 +183,9 @@ class HARPN:
             spec['flux'], flg = self._deblaze(file, spec['flux_raw'], blaze_file, flg, instr)
 
 
-        sigdet = hdr['HIERARCH TNG DRS CCD SIGDET'] #CCD Readout Noise [e-] 
-        gain = hdr['HIERARCH TNG DRS CCD CONAD']  #CCD conversion factor [e-/ADU]
-        headers['noise'] = sigdet * gain # Read-Out-Noise per pixel
+        # sigdet = hdr['HIERARCH TNG DRS CCD SIGDET'] #CCD Readout Noise [e-] 
+        # gain = hdr['HIERARCH TNG DRS CCD CONAD']  #CCD conversion factor [e-/ADU]
+        # headers['noise'] = sigdet * gain # Read-Out-Noise per pixel
 
         headers['spec_flg'] = flg
 

@@ -6,7 +6,7 @@ import pandas as pd
 from ._spec_tools import printif, read_fits, read_headers, wave_star_rest_frame, wave_corr_berv
 
 """
-IMPORTANT NOTE: RV error is quaadratic sum of:
+NOTE: RV error is quadratic sum of:
 HIERARCH ESO DRS CAL TH ERROR [m/s]
 HIERARCH ESO DRS CCF NOISE [km/s]
 HIERARCH ESO DRS DRIFT NOISE [m/s]
@@ -14,35 +14,38 @@ HIERARCH ESO DRS DRIFT NOISE [m/s]
 obs = 'ESO'
 
 spec_hdrs = dict(
-    obj        = 'OBJECT',
-    instr      = 'INSTRUME',
-    date_obs   = 'DATE-OBS',
-    bjd        = f'HIERARCH {obs} DRS BJD',
-    drs        = f'HIERARCH {obs} DRS VERSION',
-    exptime    = f'EXPTIME',
-    ra       = 'RA',
-    dec      = 'DEC',
-    snr7     = f'HIERARCH {obs} DRS SPE EXT SN{7}',
-    snr50    = f'HIERARCH {obs} DRS SPE EXT SN{50}',
-    prog_id  = f'HIERARCH {obs} OBS PROG ID',
-    pi_coi   = f'HIERARCH {obs} OBS PI-COI NAME',
-    cal_th_err = f'HIERARCH {obs} DRS CAL TH ERROR', # estim err on wave sol(m/s)
+    obj         = 'OBJECT',
+    instr       = 'INSTRUME',
+    date_obs    = 'DATE-OBS',
+    bjd         = f'HIERARCH {obs} DRS BJD',
+    drs         = f'HIERARCH {obs} DRS VERSION',
+    exptime     = f'EXPTIME',
+    ra          = 'RA',
+    dec         = 'DEC',
+    snr7        = f'HIERARCH {obs} DRS SPE EXT SN{7}',
+    snr50       = f'HIERARCH {obs} DRS SPE EXT SN{50}',
+    prog_id     = f'HIERARCH {obs} OBS PROG ID',
+    pi_coi      = f'HIERARCH {obs} OBS PI-COI NAME',
+    cal_th_err  = f'HIERARCH {obs} DRS CAL TH ERROR', # estim err on wave sol(m/s)
     berv        = f"HIERARCH {obs} DRS BERV",        # [km/s]
+    targ_rv     = f'HIERARCH {obs} TEL TARG RADVEL',  # [km/s]
+    #drift_rv    = f"HIERARCH {obs} DRS DRIFT RV USED" # Drift rv [m/s]
 )
 
 ccf_hdrs = dict(
     rv          = f"HIERARCH {obs} DRS CCF RVC",     # [km/s] (drift corrected)
     dvrms       = f"HIERARCH {obs} DRS DVRMS",       # [m/s]
-    berv        = f"HIERARCH {obs} DRS BERV",        # [km/s]
+    #berv        = f"HIERARCH {obs} DRS BERV",        # [km/s]
     ccf_noise   = f'HIERARCH {obs} DRS CCF NOISE',   # [km/s] Photon noise on CCF RV
     fwhm        = f'HIERARCH {obs} DRS CCF FWHM',    # [km/s]
     cont        = f'HIERARCH {obs} DRS CCF CONTRAST', # [%]
     mask        = f"HIERARCH {obs} DRS CCF MASK",
-    drift_noise = f'HIERARCH {obs} DRS DRIFT NOISE' # Th Drift photon noise [m/s]
+    drift_noise = f'HIERARCH {obs} DRS DRIFT NOISE', # Th Drift photon noise [m/s]
+    drift_rv    = f"HIERARCH {obs} DRS DRIFT RV USED", # Drift rv [m/s]
 )
 
 bis_hdrs = dict(
-        bis = f'HIERARCH {obs} DRS BIS SPAN' # [km/s]
+    bis         = f'HIERARCH {obs} DRS BIS SPAN' # [km/s]
     )
 
 
@@ -122,6 +125,8 @@ class HARPS:
             printif("Reading CCF file", verb)
             ccf_file, _ = self._search_file(file, headers['ftype'], type='ccf', verb=verb)
 
+
+        # TODO: make option to get RV from spectra files and as an INPUT!
         if get_ccf and ccf_file:
             ccf_profile = dict()
 
@@ -130,17 +135,17 @@ class HARPS:
 
             headers = read_headers(ccf_hdr, ccf_hdrs, data=headers)
 
-            for key in headers.keys():
-                if key in ['rv', 'berv', 'ccf_noise', 'fwhm']:
-                    headers[key] *= 1e3 # to m/s
+            # for key in headers.keys():
+            #     if key in ['rv', 'berv', 'ccf_noise', 'fwhm']:
+            #         headers[key] *= 1e3 # to m/s
 
             self.ccf_profile = ccf_profile
 
-        elif not ccf_file:
-            printif(f"*** ERROR: Spectrum {file} ignored.", verb=verb)
-            self.spectrum = spec
-            self.headers = headers
-            return
+        # elif not ccf_file:
+        #     printif(f"*** ERROR: Spectrum {file} ignored.", verb=verb)
+        #     self.spectrum = spec
+        #     self.headers = headers
+        #     return
 
         # CCF bisector data:
         if get_bis:
@@ -156,23 +161,50 @@ class HARPS:
 
             self.ccf_bisector = ccf_bisector
 
+
+        keys = ['rv', 'berv', 'ccf_noise', 'fwhm', 'targ_rv']
+        for key in keys:
+            if key in headers:
+                try:
+                    headers[key] *= 1e3 # to m/s
+                except TypeError:
+                    continue
+
         
         # Calibrate wavelength to stellar rest frame:
         # TODO: star_rest_frame and corr_berv should not be dependent on ccf file
         # TODO: should have option to get spectrum without star rest frame
-        if get_ccf and ccf_file:
-            rv = headers['rv']
-            if headers['ftype'] == 's1d' and not np.isnan(rv):
-                spec['wave'] = wave_star_rest_frame(spec['wave_raw'], rv)
-
-            elif headers['ftype'] == 'e2ds' and not np.isnan(rv) and 'berv' in headers:
-                spec['wave'] = wave_corr_berv(spec['wave_raw'], headers['berv'])
-                spec['wave'] = wave_star_rest_frame(spec['wave'], rv)
+        if 'rv' not in headers.keys():
+            rv = headers['targ_rv']
         else:
-            # TODO: add option to input low precision RV (IMPORTANT!)
-            rv = np.nan
+            rv = headers['rv']
+
+        # Calibrate wavelength to stellar rest frame:
+        if headers['ftype'] == 's1d' and not file.endswith("_rv.fits"):
+            spec['wave'] = wave_star_rest_frame(spec['wave_raw'], rv)
+            #spec['wave'] = spec['wave_raw']
+            #spec['wave'] = wave_corr_berv(spec['wave'], headers['berv'])
+        elif headers['ftype'] == 's1d' and file.endswith("_rv.fits"):
+            spec['wave'] = spec['wave_raw']
+        elif headers['ftype'] == 'e2ds' and 'berv' in headers:
+            spec['wave'] = wave_corr_berv(spec['wave_raw'], headers['berv'])
+        else:
             flg = "WaveNotCorr"
             printif("*** WARNING: Cannot shift spectrum to target rest frame", verb)
+
+        # if get_ccf and ccf_file:
+        #     rv = headers['rv']
+        #     if headers['ftype'] == 's1d' and not np.isnan(rv):
+        #         spec['wave'] = wave_star_rest_frame(spec['wave_raw'], rv)
+
+        #     elif headers['ftype'] == 'e2ds' and not np.isnan(rv) and 'berv' in headers:
+        #         spec['wave'] = wave_corr_berv(spec['wave_raw'], headers['berv'])
+        #         spec['wave'] = wave_star_rest_frame(spec['wave'], rv)
+        # else:
+        #     # TODO: add option to input low precision RV (IMPORTANT!)
+        #     rv = np.nan
+        #     flg = "WaveNotCorr"
+        #     printif("*** WARNING: Cannot shift spectrum to target rest frame", verb)
 
         # Flux photon noise:
         spec['flux_err'] = np.sqrt(abs(spec['flux_raw']))
@@ -181,7 +213,7 @@ class HARPS:
         if headers['ftype'] == 's1d':
             # Already deblazed
             spec['flux'] = spec['flux_raw']
-            del spec['flux_raw']
+            #del spec['flux_raw']
 
         if headers['ftype'] == 'e2ds':
             blaze_file = hdr['HIERARCH ESO DRS BLAZE FILE']
@@ -189,11 +221,18 @@ class HARPS:
 
 
         
-        sigdet = hdr['HIERARCH ESO DRS CCD SIGDET'] #CCD Readout Noise [e-] 
-        gain = hdr['HIERARCH ESO DRS CCD CONAD']  #CCD conversion factor [e-/ADU]
-        headers['noise'] = sigdet * gain # Read-Out-Noise per pixel
+        # sigdet = hdr['HIERARCH ESO DRS CCD SIGDET'] #CCD Readout Noise [e-] 
+        # gain = hdr['HIERARCH ESO DRS CCD CONAD']  #CCD conversion factor [e-/ADU]
+        # headers['noise'] = sigdet * gain # Read-Out-Noise per pixel
 
-        headers['rv_err'] = np.sqrt(headers['ccf_noise']**2 + headers['drift_noise']**2 + headers['cal_th_err']**2)
+        if ccf_file:
+            try:
+                headers['rv_err'] = np.sqrt(headers['ccf_noise']**2 + headers['drift_noise']**2 + headers['cal_th_err']**2)
+            except:
+                headers['rv_err'] = 0.0
+                flg = "NoRVerr"
+        else:
+            headers['rv_err'] = 0.0
 
         headers['spec_flg'] = flg
 
