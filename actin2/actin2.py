@@ -24,9 +24,9 @@ class ACTIN:
         ReadSpec (actin2.ReadSpec) : Object that reads spectrum and   
             headers.
         IndTable (actin2.IndTable) : Object containing the 
-            indices table.
-        ProcessSpec (actin2.ProcessSpec) : Object to process the 
-            spectrum.
+            indices parameters table.
+        CalcIndices (actin2.CalcIndices) : Object that calculates the 
+            indices.
     """
 
     def __init__(self):
@@ -111,10 +111,10 @@ class ACTIN:
         return df
 
 
-    # TODO: Finish this function
-    # TODO: Enable 2D spectrum
+
+    # TODO: Test 2D spectrum
     def plot_index_lines(self, file, index, table_df=None, wkey='wave', fkey='flux', show=True):
-        """Plot sepctral lines used to calculate index 'index'. 
+        """Plot sepctral lines and bandpasses used to calculate index 'index'. 
         """
         read_spec = self.ReadSpec(file)
         
@@ -138,8 +138,8 @@ class ACTIN:
             f = read_spec.spec.spectrum[fkey]
             w = read_spec.spec.spectrum[wkey]
 
-            mask = (w > ctr - win - win*2) 
-            mask &= (w < ctr + win + win*2)
+            mask = (w > ctr - win - 2 * win) 
+            mask &= (w < ctr + win + 2 * win)
             
             f = f[mask]
             w = w[mask]
@@ -149,7 +149,7 @@ class ACTIN:
             ax.axvline(ctr, color='k', ls=':', lw=0.7)
             ax.axvline(ctr - win, color='k', ls='--', lw=0.7)
             ax.axvline(ctr + win, color='k', ls='--', lw=0.7)
-            ax.set_xlim(ctr - win - win*2, ctr + win + win*2)
+            ax.set_xlim(w.min(), w.max())
             ax.set_xlabel("Wavelength [angstrom]")
 
         plt.tight_layout()
@@ -179,8 +179,8 @@ class ACTIN:
         f = read_spec.spec.spectrum[fkey]
         w = read_spec.spec.spectrum[wkey]
 
-        mask = (w > ctr - win - win*ntol) 
-        mask &= (w < ctr + win + win*ntol)
+        mask = (w > ctr - win - win * ntol) 
+        mask &= (w < ctr + win + win * ntol)
         
         f = f[mask]
         w = w[mask]
