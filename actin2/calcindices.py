@@ -166,7 +166,7 @@ class CalcIndices:
                 w = wave; f = flux; f_err= flux_err
 
             
-            F, F_err, rneg_ln = self.inter_flux_band(w, f, f_err, noise, ctr, win, bandtype, step, plot_lines, interp)
+            F, F_err, rneg_ln = self.interp_flux_band(w, f, f_err, noise, ctr, win, bandtype, step, plot_lines, interp)
 
             lines[line + '_F'] = F
             lines[line + '_F_err'] = F_err
@@ -196,10 +196,11 @@ class CalcIndices:
 
         val_err = np.sqrt(np.sum(F_num_err**2) + val**2 * np.sum(F_denum_err**2)) / (np.sum(F_denum))
 
+        # mean ratio of negative flux to total flux in bands
         if np.all(r_neg_flux) == np.zeros_like(r_neg_flux).all():
             r_neg_flux = 0.0
         else:
-            r_neg_flux = np.mean(r_neg_flux) # mean ratio of negative flux to total flux in bands
+            r_neg_flux = np.mean(r_neg_flux)
 
 
         data = {}
@@ -207,11 +208,13 @@ class CalcIndices:
         data[index + '_err'] = val_err
         data[index + '_mrneg'] = r_neg_flux
         
-        # add individual fluxes to output
-        for n, fi in enumerate(F_num):
-            data[index + 'F' + str(n+1)] = fi
-        for n, fi in enumerate(F_denum):
-            data[index + 'R' + str(n+1)] = fi
+        # add individual line and reference band fluxes to output
+        for n, fi, fi_err in enumerate(zip(F_num, F_num_err)):
+            data[index + '_FL' + str(n+1)] = fi
+            data[index + '_FL' + str(n+1) + "_err"] = fi_err
+        for n, fi, fi_err in enumerate(zip(F_denum, F_denum_err)):
+            data[index + '_FR' + str(n+1)] = fi
+            data[index + '_FR' + str(n+1) + "_err"] = fi_err
         
 
         if full_output:
@@ -221,7 +224,7 @@ class CalcIndices:
 
 
     
-    def inter_flux_band(self, wave, flux, flux_err, noise, ctr, win, bandtype, step, show_plot=False, interp=True):
+    def interp_flux_band(self, wave, flux, flux_err, noise, ctr, win, bandtype, step, show_plot=False, interp=True):
         """Calculate average flux in bandpass.
         
         Interpolates between the limiting pixels and the bandpass limits to deal with the finite spectrograph resolution."""
@@ -231,7 +234,7 @@ class CalcIndices:
         if bandtype == "sq":
             wmin = ctr - win/2; wmax = ctr + win/2
 
-        def interpolate_band_lims(array, wave, wmin, wmax, step):
+        def interp_band_lims(array, wave, wmin, wmax, step):
             """Interpolate the flux between the limiting pixels and the bandpass limits wmin and wmax to reduce the effect of the finite spectrograph resolution.
 
             Args:
@@ -289,8 +292,8 @@ class CalcIndices:
 
 
         if interp:
-            wave_i, flux_i = interpolate_band_lims(flux, wave, wmin, wmax, step)
-            _, flux_err_i = interpolate_band_lims(flux_err, wave, wmin, wmax, step)
+            wave_i, flux_i = interp_band_lims(flux, wave, wmin, wmax, step)
+            _, flux_err_i = interp_band_lims(flux_err, wave, wmin, wmax, step)
         else:
             mask = (wave >= wmin) & (wave <= wmax)
             flux_i = flux[mask]
