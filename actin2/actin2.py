@@ -30,6 +30,7 @@ class ACTIN:
     """
 
     def __init__(self):
+        self.version = '2.0.0 beta 5'
         self.ReadSpec = ReadSpec
         self.IndTable = IndTable
         self.CalcIndices = CalcIndices
@@ -93,7 +94,7 @@ class ACTIN:
             data = calc_ind.data
 
             # TODO: make function to read version from VERSION
-            data['actin_ver'] = '2.0.0 beta 5'
+            data['actin_ver'] = self.version
 
             actin.append(data)
 
