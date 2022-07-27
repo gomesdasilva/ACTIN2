@@ -14,10 +14,10 @@ spec_hdrs = dict(
     date_obs = 'DATE-OBS',
     bjd      = 'HIERARCH ESO QC BJD',
     rv       = 'HIERARCH ESO QC CCF RV', # Radial velocity [km/s]
-    rv_err   = 'HIERARCH ESO QC CCF RV ERROR', # Uncertainty on radial velocity [m/s]
+    rv_err   = 'HIERARCH ESO QC CCF RV ERROR', # Uncertainty on radial velocity [km/s]
     berv     = 'HIERARCH ESO QC BERV', # [km/s]
     fwhm     = 'HIERARCH ESO QC CCF FWHM', # CCF FWHM [km/s] 
-    fwhm_err = 'HIERARCH ESO QC CCF FWHM ERROR', # Uncertainty on CCF FWHM [m/s?]
+    fwhm_err = 'HIERARCH ESO QC CCF FWHM ERROR', # Uncertainty on CCF FWHM [km/s]
     cont     = 'HIERARCH ESO QC CCF CONTRAST', # CCF contrast [%]                
     cont_err = 'HIERARCH ESO QC CCF CONTRAST ERROR', # CCF contrast error [%] 
     bis      = 'HIERARCH ESO QC CCF BIS SPAN', # CCF bisector span [km/s]     
@@ -125,7 +125,7 @@ class ESPRESSO:
             headers['ftype'] = 'S2D'
 
         for key in headers:
-            if key in ['rv', 'fwhm', 'bis', 'berv']:
+            if key in ['rv', 'rv_err', 'fwhm', 'bis', 'berv']:
                 headers[key] = headers[key]*1e3 # to m/s
 
 
