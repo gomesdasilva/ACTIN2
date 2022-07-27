@@ -93,14 +93,14 @@ class ACTIN:
             data = calc_ind.data
 
             # TODO: make function to read version from VERSION
-            data['actin_ver'] = '2.0.0 beta 3'
+            data['actin_ver'] = '2.0.0 beta 5'
 
             actin.append(data)
 
 
         df = pd.DataFrame(actin)
 
-        # TODO: option to save rdb files
+        # TODO: option to save rdb files?
 
         if save_data:
             if not os.path.isdir(os.path.dirname(save_data)):

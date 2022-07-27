@@ -65,7 +65,7 @@ def check_negflux(flux, verb=True):
     pos_flux = np.sum(flux[flux > 0])
 
     # Negative flux ratio for a given spectral line:
-    r_neg_ln = abs(neg_flux)/tot_flux
+    Rneg_ln = abs(neg_flux)/tot_flux
 
     flg_negflux = "OK"
 
@@ -74,15 +74,12 @@ def check_negflux(flux, verb=True):
             print(f"Negative flux detected")
         flg_negflux = "negFlux"
 
-    return r_neg_ln, neg_flux, tot_flux, flg_negflux
+    return Rneg_ln, neg_flux, tot_flux, flg_negflux
 
 
 
 
 class CalcIndices:
-
-    # TODO: add the above functions to the class?
-    # TODO: Try to separate total noise from photon noise and RON
 
     def __init__(self, spec, indices, step=1e-6, table_df=None, plot_lines=False, full_output=False, interp=True, verb=False):
 
@@ -148,8 +145,9 @@ class CalcIndices:
         F_num_err = []
         F_denum = []
         F_denum_err = []
-        r_neg_flux = []
+        wRneg_lines = []
         lines = {}
+        win_list = []
         for line in ln_ids:
             mask = (df.ln_id == line)
 
@@ -166,14 +164,14 @@ class CalcIndices:
                 w = wave; f = flux; f_err= flux_err
 
             
-            F, F_err, rneg_ln = self.interp_flux_band(w, f, f_err, noise, ctr, win, bandtype, step, plot_lines, interp)
+            F, F_err, wRneg_ln = self.interp_flux_band(w, f, f_err, noise, ctr, win, bandtype, step, plot_lines, interp)
 
-            lines[line + '_F'] = F
-            lines[line + '_F_err'] = F_err
-            lines[line + 'rneg'] = rneg_ln
+            lines["I_" + line + '_F'] = F
+            lines["I_" + line + '_F_err'] = F_err
+            lines["I_" + line + '_wRneg'] = wRneg_ln
                 
 
-            r_neg_flux.append(rneg_ln)
+            wRneg_lines.append(wRneg_ln)
 
             if ind_var.startswith("L"):
                 F_num.append(const * F)
@@ -182,6 +180,8 @@ class CalcIndices:
             elif ind_var.startswith("R"):
                 F_denum.append(const * F)
                 F_denum_err.append(F_err)
+
+            win_list.append(win)
 
 
         F_num = np.asarray(F_num)
@@ -196,25 +196,17 @@ class CalcIndices:
 
         val_err = np.sqrt(np.sum(F_num_err**2) + val**2 * np.sum(F_denum_err**2)) / (np.sum(F_denum))
 
-        # mean ratio of negative flux to total flux in bands
-        if np.all(r_neg_flux) == np.zeros_like(r_neg_flux).all():
-            r_neg_flux = 0.0
-        else:
-            r_neg_flux = np.mean(r_neg_flux)
+        # weighted ratio of negative flux to total flux
+        # if this value is 1 it means all flux in all the lines is negative
+        # if this value is 0.01, then 1% of the flux in used to compute the index is negative
+        # TODO: test for which values of wRneg the index deviates by more than 1-sigma
+        wRneg = np.mean(wRneg_lines)#/np.sum(win_list)
 
 
         data = {}
         data[index] = val
         data[index + '_err'] = val_err
-        data[index + '_mrneg'] = r_neg_flux
-        
-        # add individual line and reference band fluxes to output
-        for n, fi, fi_err in enumerate(zip(F_num, F_num_err)):
-            data[index + '_FL' + str(n+1)] = fi
-            data[index + '_FL' + str(n+1) + "_err"] = fi_err
-        for n, fi, fi_err in enumerate(zip(F_denum, F_denum_err)):
-            data[index + '_FR' + str(n+1)] = fi
-            data[index + '_FR' + str(n+1) + "_err"] = fi_err
+        data[index + '_wRneg'] = wRneg
         
 
         if full_output:
@@ -227,7 +219,12 @@ class CalcIndices:
     def interp_flux_band(self, wave, flux, flux_err, noise, ctr, win, bandtype, step, show_plot=False, interp=True):
         """Calculate average flux in bandpass.
         
-        Interpolates between the limiting pixels and the bandpass limits to deal with the finite spectrograph resolution."""
+        Interpolates between the limiting pixels and the bandpass limits to deal with the finite spectrograph resolution.
+        
+        Returns:
+            Flux in bandpass
+            Flux in bandpass error
+            Weighted negative flux ratio """
 
         if bandtype == "tri":
             wmin = ctr - win; wmax = ctr + win
@@ -248,7 +245,7 @@ class CalcIndices:
                 ndarray: Interpolated x-axis data.
                 ndarray: Interpolated y-axis data.
             """
-            # res_ratio = np.average(np.diff(wave))/step
+            # reso_ratio = np.average(np.diff(wave))/step
 
             mask = (wave >= wmin) & (wave <= wmax)
 
@@ -275,13 +272,6 @@ class CalcIndices:
             wave_i_high = np.arange(min(wave_high), max(wave_high) + step, step)
             array_i_high = interp_high(wave_i_high)
 
-            # wave_i = np.r_[wave_i_low, wave[mask], wave_i_high]
-            # array_i = np.r_[array_i_low/res_ratio, array[mask], array_i_high/res_ratio]
-
-            # mask = (wave_i >= wmin) & (wave_i <= wmax)
-            # array_i = array_i[mask]
-            # wave_i = wave_i[mask]
-
             mask_low = (wave_i_low >= wmin)
             mask_high = (wave_i_high <= wmax)
 
@@ -300,7 +290,7 @@ class CalcIndices:
             flux_err_i = flux_err[mask]
             wave_i = wave[mask]
 
-        r_neg_ln, _, _, _ = check_negflux(flux_i, verb=False)
+        Rneg_ln, _, _, _ = check_negflux(flux_i, verb=False)
         
         if bandtype == 'tri':
             bp_i = 1 - np.abs(wave_i - ctr)/win
@@ -325,7 +315,7 @@ class CalcIndices:
         flux_band = sum(flux_i * bp_i)/win
         flux_band_var= sum((flux_err_i**2 + noise**2) * bp_i**2)/win**2
 
-        return flux_band, np.sqrt(flux_band_var), r_neg_ln
+        return flux_band, np.sqrt(flux_band_var), Rneg_ln/win
 
 
 
