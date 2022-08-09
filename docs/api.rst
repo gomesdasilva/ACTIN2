@@ -4,7 +4,7 @@ API
 .. autosummary::
    :toctree: generated
 
-   actin2.ACTIN
+   actin2
 
 
 
