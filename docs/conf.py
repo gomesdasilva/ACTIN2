@@ -40,6 +40,7 @@ extensions = [
     #"myst_parser",
     "sphinx_rtd_theme",
     "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
     'sphinx.ext.napoleon',
     #'nbsphinx',
 ]
