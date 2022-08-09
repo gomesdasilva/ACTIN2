@@ -38,7 +38,8 @@ extensions = [
     #"myst_parser",
     "sphinx_rtd_theme",
     "sphinx.ext.autodoc",
-    'sphinx.ext.napoleon'
+    'sphinx.ext.napoleon',
+    'nbsphinx',
 ]
 
 napoleon_google_docstring = True
