@@ -35,7 +35,7 @@ release = '2.0'
 import sphinx_rtd_theme
 
 extensions = [
-    "myst_parser",
+    #"myst_parser",
     "sphinx_rtd_theme",
     "sphinx.ext.autodoc",
     'sphinx.ext.napoleon'
