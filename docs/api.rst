@@ -4,7 +4,8 @@
 API
 +++
 
-.. autosummary:: actin2
+.. automodule:: actin2
+   :members:
 
 
 
