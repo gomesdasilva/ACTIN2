@@ -98,5 +98,9 @@ If you make use of this code, please cite `Gomes da Silva et al. (2018) <https:/
    }
 
 
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
 
+   _static/notebooks/getstarted
 
