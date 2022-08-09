@@ -53,17 +53,9 @@ Contents
 
    quickstart
    api
+   _static/notebooks/getstarted
 
 
-
-
-
-Indices and tables
-------------------
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
 
 
 License & Attribution
@@ -96,11 +88,3 @@ If you make use of this code, please cite `Gomes da Silva et al. (2018) <https:/
        adsurl = {https://ui.adsabs.harvard.edu/abs/2018JOSS....3..667G},
       adsnote = {Provided by the SAO/NASA Astrophysics Data System}
    }
-
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
-   _static/notebooks/getstarted
-
