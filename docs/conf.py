@@ -33,9 +33,11 @@ release = '2.0'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 import sphinx_rtd_theme
+import myst_parser
+import nbsphinx
 
 extensions = [
-    #"myst_parser",
+    "myst_parser",
     "sphinx_rtd_theme",
     "sphinx.ext.autodoc",
     'sphinx.ext.napoleon',
