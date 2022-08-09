@@ -52,9 +52,8 @@ Contents
    :maxdepth: 2
 
    quickstart
+   _static/notebooks/getstarted
    api
-   notebooks/getstarted
-
 
 
 
