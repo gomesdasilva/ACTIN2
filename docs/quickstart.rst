@@ -46,11 +46,3 @@ However, ``ACTIN`` already comes with a handy built-in plotting tool for spectra
 .. code:: python
 
     spec.plot(show=True)
-    
-
-
-.. module:: actin2
-
-.. automodule:: actin2.calcindices
-   :members:
-
