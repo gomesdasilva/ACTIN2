@@ -49,7 +49,7 @@ However, ``ACTIN`` already comes with a handy built-in plotting tool for spectra
     
 
 
-
+.. module:: actin2
 
 
 
