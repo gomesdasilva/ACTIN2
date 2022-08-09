@@ -53,7 +53,7 @@ Contents
 
    quickstart
    api
-   _static/notebooks/getstarted
+   notebooks/getstarted
 
 
 
