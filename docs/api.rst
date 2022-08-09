@@ -1,9 +1,15 @@
+.. api::
+
+
+API
++++
+
 .. autosummary::
-    :toctree: generated
+   :toctree: generated
     
-    actin2/actin2
-    actin2/ReadSpec
-    actin2
-    CalcIndices
+   actin2/actin2
+   actin2/ReadSpec
+   actin2
+   CalcIndices
 
 
