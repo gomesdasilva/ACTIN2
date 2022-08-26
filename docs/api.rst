@@ -4,10 +4,10 @@ API
 .. autosummary::
    :toctree: generated
 
-   actin2.ACTIN
-   readspec.ReadSpec
-   indtable.IndTable
-   calcindices.CalcIndices
+   actin2.actin2.ACTIN
+   actin2.readspec.ReadSpec
+   actin2.indtable.IndTable
+   actin2.calcindices.CalcIndices
 
 .. automodule:: actin2.actin2
    :members:

@@ -51,7 +51,7 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     'sphinx.ext.napoleon',
-    #'nbsphinx',
+    'nbsphinx',
 ]
 
 napoleon_google_docstring = True
@@ -88,3 +88,5 @@ html_theme = "sphinx_rtd_theme"
 html_static_path = ['_static']
 
 html_logo = 'img/logo.png'
+
+autosummary_generate = True
