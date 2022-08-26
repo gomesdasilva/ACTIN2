@@ -1,5 +1,5 @@
-ACTIN: Activity Indices Toolkit
-===============================
+ACTIN 2: Activity Indices Toolkit
+=================================
 
 ACTIN is a python tool that calculates user defined spectroscopic activity indices for different spectrographs.
 
@@ -10,12 +10,12 @@ The errors are the photon noise, however there is an option to include extra noi
 Included are some of the most used activity proxies in the optical:
 
 - CaII H&K (S-index)
-- H$\alpha$ (using 0.6 and 1.6 angstrom bandpasses)
+- H:math:`\alpha` (using 0.6 and 1.6 angstrom bandwidths)
 - NaI D2
 - HeI
 
 A description of these indices is provided in `Gomes da Silva et al. (2011) <https://ui.adsabs.harvard.edu/abs/2011A%26A...534A..30G/abstract>`_.
-Other indices can be added easily by editing the indices table (see `The indices table <file:///Users/jgsilva/Astrophysics/Packages/ACTIN2/docs/_build/html/add_index.html>`_).
+Other indices can be added easily by editing the indices table (see `The indices table <https://actin2.readthedocs.io/en/latest/add_index.html>`_).
 
 Implemented spectrographs:
 
@@ -23,8 +23,8 @@ Implemented spectrographs:
 - HARPS-N
 - ESPRESSO
 
-New instruments are easy to implement (see `Adding new spectrographs <file:///Users/jgsilva/Astrophysics/Packages/ACTIN2/docs/_build/html/add_spec.html>`_).
-Activity indices can also be calculated for any spectrum if the wavelength and flux are available (see `Using ACTIN with any spectra <file:///Users/jgsilva/Astrophysics/Packages/ACTIN2/docs/_build/html/calc_act_general.html>`_).
+New instruments are easy to implement (see `Adding new spectrographs <https://actin2.readthedocs.io/en/latest/add_spec.html>`_).
+Activity indices can also be calculated for any spectrum if the wavelength and flux are available (see `Using ACTIN with any spectra <https://actin2.readthedocs.io/en/latest/calc_act_general.html>`_).
 
 With a simple one line python code, it is possible to run ACTIN on a list of fits files and extract a list of activity indices:
 
