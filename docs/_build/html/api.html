@@ -203,13 +203,13 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/actin2.actin2.ACTIN.html#actin2.actin2.ACTIN" title="actin2.actin2.ACTIN"><code class="xref py py-obj docutils literal notranslate"><span class="pre">actin2.actin2.ACTIN</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#actin2.actin2.ACTIN" title="actin2.actin2.ACTIN"><code class="xref py py-obj docutils literal notranslate"><span class="pre">actin2.actin2.ACTIN</span></code></a>()</p></td>
 <td><p>The ACTIN class.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/actin2.readspec.ReadSpec.html#actin2.readspec.ReadSpec" title="actin2.readspec.ReadSpec"><code class="xref py py-obj docutils literal notranslate"><span class="pre">actin2.readspec.ReadSpec</span></code></a>(file[, verb, …])</p></td>
 <td><p>Extracts data from spectrograph fits files.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/actin2.indtable.IndTable.html#actin2.indtable.IndTable" title="actin2.indtable.IndTable"><code class="xref py py-obj docutils literal notranslate"><span class="pre">actin2.indtable.IndTable</span></code></a>([table_csv, verb])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#actin2.indtable.IndTable" title="actin2.indtable.IndTable"><code class="xref py py-obj docutils literal notranslate"><span class="pre">actin2.indtable.IndTable</span></code></a>([table_csv, verb])</p></td>
 <td><p>Class to manipulate the indices table.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/actin2.calcindices.CalcIndices.html#actin2.calcindices.CalcIndices" title="actin2.calcindices.CalcIndices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">actin2.calcindices.CalcIndices</span></code></a>(spectrum, …)</p></td>
@@ -242,7 +242,7 @@ headers. See <a class="reference internal" href="generated/actin2.readspec.ReadS
 <dt id="actin2.actin2.ACTIN.IndTable">
 <code class="sig-name descname">IndTable</code><a class="headerlink" href="#actin2.actin2.ACTIN.IndTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>Object containing the
-indices parameters table. See <a class="reference internal" href="generated/actin2.indtable.IndTable.html#actin2.indtable.IndTable" title="actin2.indtable.IndTable"><code class="xref py py-class docutils literal notranslate"><span class="pre">actin2.indtable.IndTable</span></code></a></p>
+indices parameters table. See <a class="reference internal" href="#actin2.indtable.IndTable" title="actin2.indtable.IndTable"><code class="xref py py-class docutils literal notranslate"><span class="pre">actin2.indtable.IndTable</span></code></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p>actin2.IndTable</p>
@@ -315,9 +315,9 @@ If None use the default table.</p></li>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>file</strong> (<em>str</em>) – Fits file path containing the spectral data.</p></li>
-<li><p><strong>spec_class_in</strong> (<em>str</em><em>, </em><em>None</em>) – Spectrograph class identification. Usefull if new spectrographs are added.</p></li>
+<li><p><strong>spec_class_in</strong> (<em>str</em><em>, </em><em>None</em>) – Spectrograph class identification. Useful if new spectrographs are added.</p></li>
 <li><p><strong>verb</strong> (<em>bool</em>) – Turn verbose on/off.</p></li>
-<li><p><strong>**spec_kw</strong> (<em>dict</em>) – Additional keyword arguments to be passed to thhe spectrograph class.</p></li>
+<li><p><strong>**spec_kw</strong> (<em>dict</em>) – Additional keyword arguments to be passed to the spectrograph class.</p></li>
 </ul>
 </dd>
 </dl>
@@ -367,6 +367,10 @@ the fits file</p>
 in <code class="docutils literal notranslate"><span class="pre">spectrum</span></code> dictionary.</p></li>
 <li><p><strong>key_flux</strong> (<em>str</em><em>, </em><em>option</em>) – Keyword for the flux array stored
 in <code class="docutils literal notranslate"><span class="pre">spectrum</span></code> dictionary.</p></li>
+<li><p><strong>order</strong> (<em>int</em><em>, </em><em>None</em>) – Spectral order to plot if using 2D spectrum.</p></li>
+<li><p><strong>ax</strong> (<em>matplotlib.axes</em><em>, </em><em>None</em>) – Axes for the plot. If <code class="docutils literal notranslate"><span class="pre">None</span></code> creates <code class="docutils literal notranslate"><span class="pre">plt</span></code> axes.</p></li>
+<li><p><strong>show</strong> (<em>bool</em>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code> show the plot.</p></li>
+<li><p><strong>**plt_kw</strong> – Additional keyword arguments to be passed to <code class="docutils literal notranslate"><span class="pre">plt.plot()</span></code>.</p></li>
 </ul>
 </dd>
 </dl>
@@ -448,6 +452,12 @@ in <code class="docutils literal notranslate"><span class="pre">spectrum</span><
 <li><p><strong>spectrum</strong> (<em>dict</em>) – Dictionary containing wavelength <code class="docutils literal notranslate"><span class="pre">wave</span></code> and flux <code class="docutils literal notranslate"><span class="pre">flux</span></code> data.</p></li>
 <li><p><strong>headers</strong> (<em>dict</em>) – Dictionary containing useful fits headers information.</p></li>
 <li><p><strong>indices</strong> (<em>list</em><em>, </em><em>str</em>) – List of indices <code class="docutils literal notranslate"><span class="pre">ìnd_id</span></code> to be extracted.</p></li>
+<li><p><strong>step</strong> (<em>float</em>) – Step used in interpolation. Must have <code class="docutils literal notranslate"><span class="pre">interp=True</span></code></p></li>
+<li><p><strong>table_df</strong> (<em>pd.DataFrame</em><em>, </em><em>None</em>) – Indices table to be used as input. If <code class="docutils literal notranslate"><span class="pre">None</span></code> the default <code class="docutils literal notranslate"><span class="pre">actin_table.csv</span></code> will be used.</p></li>
+<li><p><strong>plot_lines</strong> (<em>bool</em>) – Diagnostic plot.</p></li>
+<li><p><strong>full_output</strong> (<em>bool</em>) – if <code class="docutils literal notranslate"><span class="pre">True</span></code> the output includes the fluxes and errors in of each line.</p></li>
+<li><p><strong>interp</strong> (<em>bool</em>) – Use interpolation to reeduce the effect of finite resolution of thhe spectrographs. The interpolation step is <code class="docutils literal notranslate"><span class="pre">step</span></code> value.</p></li>
+<li><p><strong>verb</strong> (<em>bool</em>) – Turn verbose on/off.</p></li>
 </ul>
 </dd>
 </dl>
@@ -477,29 +487,6 @@ in <code class="docutils literal notranslate"><span class="pre">spectrum</span><
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="actin2.calcindices.CalcIndices._spec_order">
-<code class="sig-name descname">_spec_order</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">wave_2d</span></em>, <em class="sig-param"><span class="n">flux_2d</span></em>, <em class="sig-param"><span class="n">flux_2d_err</span></em>, <em class="sig-param"><span class="n">ln_ctr</span></em>, <em class="sig-param"><span class="n">ln_win</span></em>, <em class="sig-param"><span class="n">bandtype</span></em>, <em class="sig-param"><span class="n">type</span><span class="o">=</span><span class="default_value">'dist'</span></em>, <em class="sig-param"><span class="n">show_orders</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">verb</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#actin2.calcindices.CalcIndices._spec_order" title="Permalink to this definition">¶</a></dt>
-<dd><p>Choose best spectral order for line and returns wave and flux at order.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="actin2.calcindices.CalcIndices.calc_flux_band">
-<code class="sig-name descname">calc_flux_band</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">wave</span></em>, <em class="sig-param"><span class="n">flux</span></em>, <em class="sig-param"><span class="n">flux_err</span></em>, <em class="sig-param"><span class="n">noise</span></em>, <em class="sig-param"><span class="n">ctr</span></em>, <em class="sig-param"><span class="n">win</span></em>, <em class="sig-param"><span class="n">bandtype</span></em>, <em class="sig-param"><span class="n">step</span></em>, <em class="sig-param"><span class="n">show_plot</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">interp</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">verb</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#actin2.calcindices.CalcIndices.calc_flux_band" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate average flux in bandpass.</p>
-<p>If <code class="docutils literal notranslate"><span class="pre">interp</span></code> is True interpolates between the limiting pixels and the bandpass limits to deal with the finite spectrograph resolution. Recomended for low-resolution spectrographs.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Flux in bandpass.
-float: Flux in bandpass error.
-float: Negative flux ratio.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>float</p>
 </dd>
 </dl>
 </dd></dl>

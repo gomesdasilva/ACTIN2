@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ACTIN: Activity Indices Toolkit &mdash; ACTIN 2.0 beta 7 documentation</title>
+  <title>ACTIN 2: Activity Indices Toolkit &mdash; ACTIN 2.0 beta 7 documentation</title>
   
 
   
@@ -145,7 +145,7 @@
     
       <li><a href="#" class="icon icon-home"></a> &raquo;</li>
         
-      <li>ACTIN: Activity Indices Toolkit</li>
+      <li>ACTIN 2: Activity Indices Toolkit</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -188,8 +188,8 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="actin-activity-indices-toolkit">
-<h1>ACTIN: Activity Indices Toolkit<a class="headerlink" href="#actin-activity-indices-toolkit" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="actin-2-activity-indices-toolkit">
+<h1>ACTIN 2: Activity Indices Toolkit<a class="headerlink" href="#actin-2-activity-indices-toolkit" title="Permalink to this headline">¶</a></h1>
 <p>ACTIN is a python tool that calculates user defined spectroscopic activity indices for different spectrographs.</p>
 <p>The method used is based on the original s-index (see <a class="reference external" href="https://ui.adsabs.harvard.edu/abs/1991ApJS...76..383D/abstract">Duncan et al. 1991</a>), where the flux in the cores of the activity sensitive lines is divided by reference pseudo-continuum regions.
 The flux determination, index calculation and errors are described in the Appendix A of <a class="reference external" href="https://ui.adsabs.harvard.edu/abs/2021A%26A...646A..77G/abstract">Gomes da Silva et al. (2021)</a>.
@@ -197,20 +197,20 @@ The errors are the photon noise, however there is an option to include extra noi
 <p>Included are some of the most used activity proxies in the optical:</p>
 <ul class="simple">
 <li><p>CaII H&amp;K (S-index)</p></li>
-<li><p>H$alpha$ (using 0.6 and 1.6 angstrom bandpasses)</p></li>
+<li><p><span class="math notranslate nohighlight">\(\mbox{H}\alpha\)</span> (using 0.6 and 1.6 angstrom bandwidths)</p></li>
 <li><p>NaI D2</p></li>
 <li><p>HeI</p></li>
 </ul>
 <p>A description of these indices is provided in <a class="reference external" href="https://ui.adsabs.harvard.edu/abs/2011A%26A...534A..30G/abstract">Gomes da Silva et al. (2011)</a>.
-Other indices can be added easily by editing the indices table (see <a class="reference external" href="file:///Users/jgsilva/Astrophysics/Packages/ACTIN2/docs/_build/html/add_index.html">The indices table</a>).</p>
+Other indices can be added easily by editing the indices table (see <a class="reference external" href="https://actin2.readthedocs.io/en/latest/add_index.html">The indices table</a>).</p>
 <p>Implemented spectrographs:</p>
 <ul class="simple">
 <li><p>HARPS</p></li>
 <li><p>HARPS-N</p></li>
 <li><p>ESPRESSO</p></li>
 </ul>
-<p>New instruments are easy to implement (see <a class="reference external" href="file:///Users/jgsilva/Astrophysics/Packages/ACTIN2/docs/_build/html/add_spec.html">Adding new spectrographs</a>).
-Activity indices can also be calculated for any spectrum if the wavelength and flux are available (see <a class="reference external" href="file:///Users/jgsilva/Astrophysics/Packages/ACTIN2/docs/_build/html/calc_act_general.html">Using ACTIN with any spectra</a>).</p>
+<p>New instruments are easy to implement (see <a class="reference external" href="https://actin2.readthedocs.io/en/latest/add_spec.html">Adding new spectrographs</a>).
+Activity indices can also be calculated for any spectrum if the wavelength and flux are available (see <a class="reference external" href="https://actin2.readthedocs.io/en/latest/calc_act_general.html">Using ACTIN with any spectra</a>).</p>
 <p>With a simple one line python code, it is possible to run ACTIN on a list of fits files and extract a list of activity indices:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">actin2</span> <span class="kn">import</span> <span class="n">ACTIN</span>
 <span class="n">actin</span> <span class="o">=</span> <span class="n">ACTIN</span><span class="p">()</span>

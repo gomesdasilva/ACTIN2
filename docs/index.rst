@@ -10,7 +10,7 @@ The errors are the photon noise, however there is an option to include extra noi
 Included are some of the most used activity proxies in the optical:
 
 - CaII H&K (S-index)
-- H:math:`\\alpha` (using 0.6 and 1.6 angstrom bandwidths)
+- :math:`\mbox{H}\alpha` (using 0.6 and 1.6 angstrom bandwidths)
 - NaI D2
 - HeI
 

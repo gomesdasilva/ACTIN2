@@ -208,6 +208,12 @@
 <li><p><strong>spectrum</strong> (<em>dict</em>) – Dictionary containing wavelength <code class="docutils literal notranslate"><span class="pre">wave</span></code> and flux <code class="docutils literal notranslate"><span class="pre">flux</span></code> data.</p></li>
 <li><p><strong>headers</strong> (<em>dict</em>) – Dictionary containing useful fits headers information.</p></li>
 <li><p><strong>indices</strong> (<em>list</em><em>, </em><em>str</em>) – List of indices <code class="docutils literal notranslate"><span class="pre">ìnd_id</span></code> to be extracted.</p></li>
+<li><p><strong>step</strong> (<em>float</em>) – Step used in interpolation. Must have <code class="docutils literal notranslate"><span class="pre">interp=True</span></code></p></li>
+<li><p><strong>table_df</strong> (<em>pd.DataFrame</em><em>, </em><em>None</em>) – Indices table to be used as input. If <code class="docutils literal notranslate"><span class="pre">None</span></code> the default <code class="docutils literal notranslate"><span class="pre">actin_table.csv</span></code> will be used.</p></li>
+<li><p><strong>plot_lines</strong> (<em>bool</em>) – Diagnostic plot.</p></li>
+<li><p><strong>full_output</strong> (<em>bool</em>) – if <code class="docutils literal notranslate"><span class="pre">True</span></code> the output includes the fluxes and errors in of each line.</p></li>
+<li><p><strong>interp</strong> (<em>bool</em>) – Use interpolation to reeduce the effect of finite resolution of thhe spectrographs. The interpolation step is <code class="docutils literal notranslate"><span class="pre">step</span></code> value.</p></li>
+<li><p><strong>verb</strong> (<em>bool</em>) – Turn verbose on/off.</p></li>
 </ul>
 </dd>
 </dl>
@@ -238,8 +244,8 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#actin2.calcindices.CalcIndices.__init__" title="actin2.calcindices.CalcIndices.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(spectrum, headers, indices[, step, …])</p></td>
 <td><p>Initialize self.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../api.html#actin2.calcindices.CalcIndices.calc_flux_band" title="actin2.calcindices.CalcIndices.calc_flux_band"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_flux_band</span></code></a>(wave, flux, flux_err, noise, …)</p></td>
-<td><p>Calculate average flux in bandpass.</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_flux_band</span></code>(wave, flux, flux_err, noise, …)</p></td>
+<td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_index</span></code>(wave, flux, flux_err, noise, …)</p></td>
 <td><p></p></td>
