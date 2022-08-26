@@ -16,9 +16,9 @@ class ReadSpec:
 
     Args:
         file (str): Fits file path containing the spectral data.
-        spec_class_in (str, None): Spectrograph class identification. Usefull if new spectrographs are added.
+        spec_class_in (str, None): Spectrograph class identification. Useful if new spectrographs are added.
         verb (bool): Turn verbose on/off.
-        **spec_kw (dict): Additional keyword arguments to be passed to thhe spectrograph class.
+        **spec_kw (dict): Additional keyword arguments to be passed to the spectrograph class.
 
     *Class attributes:*
 

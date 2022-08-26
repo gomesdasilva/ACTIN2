@@ -16,6 +16,12 @@ class CalcIndices:
         spectrum (dict): Dictionary containing wavelength ``wave`` and flux ``flux`` data.
         headers (dict): Dictionary containing useful fits headers information.
         indices (list, str): List of indices ``ìnd_id`` to be extracted.
+        step (float): Step used in interpolation. Must have ``interp=True``
+        table_df (pd.DataFrame, None): Indices table to be used as input. If ``None`` the default ``actin_table.csv`` will be used.
+        plot_lines (bool): Diagnostic plot.
+        full_output (bool): if ``True`` the output includes the fluxes and errors in of each line.
+        interp (bool): Use interpolation to reeduce the effect of finite resolution of thhe spectrographs. The interpolation step is ``step`` value.
+        verb (bool): Turn verbose on/off.
 
     Attributes:
         indices (dict): Dictionary with indices data.
@@ -156,15 +162,6 @@ class CalcIndices:
 
 
     def calc_flux_band(self, wave, flux, flux_err, noise, ctr, win, bandtype, step, show_plot=False, interp=True, verb=False):
-        """Calculate average flux in bandpass.
-        
-        If ``interp`` is True interpolates between the limiting pixels and the bandpass limits to deal with the finite spectrograph resolution. Recomended for low-resolution spectrographs.
-        
-        Returns:
-            float: Flux in bandpass.
-            float: Flux in bandpass error.
-            float: Negative flux ratio.
-        """
 
         if bandtype == "tri":
             wmin = ctr - win; wmax = ctr + win
@@ -285,7 +282,6 @@ class CalcIndices:
 
 
     def _spec_order(self, wave_2d, flux_2d, flux_2d_err, ln_ctr, ln_win, bandtype, type='dist', show_orders=False, verb=False):
-        """Choose best spectral order for line and returns wave and flux at order."""
 
         if flux_2d_err is None:
             flux_2d_err = np.zeros_like(flux_2d)
