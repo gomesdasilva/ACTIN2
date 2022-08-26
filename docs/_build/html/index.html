@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ACTIN: Activity Indices Toolkit &mdash; ACTIN 2.0 documentation</title>
+  <title>ACTIN: Activity Indices Toolkit &mdash; ACTIN 2.0 beta 7 documentation</title>
   
 
   
@@ -29,13 +29,16 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Getting started" href="quickstart.html" /> 
+    <link rel="next" title="Getting started" href="getstarted.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -61,6 +64,10 @@
           
             
             
+              <div class="version">
+                2.0 beta 7
+              </div>
+            
           
 
           
@@ -84,7 +91,13 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getstarted.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="read_plot_spectrum.html">Reading and plotting a spectrum</a></li>
+<li class="toctree-l1"><a class="reference internal" href="calc_act_general.html">Using ACTIN with any spectra</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CaII_to_rhk.html">Converting CaII to <span class="math notranslate nohighlight">\(\log R'_\text{HK}\)</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="add_index.html">The indices table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mod_indices_table.html">Modifying the indices table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="add_spec.html">Adding new spectrographs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
 </ul>
 
@@ -151,64 +164,97 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="actin-activity-indices-toolkit">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="actin-activity-indices-toolkit">
 <h1>ACTIN: Activity Indices Toolkit<a class="headerlink" href="#actin-activity-indices-toolkit" title="Permalink to this headline">¶</a></h1>
 <p>ACTIN is a python tool that calculates user defined spectroscopic activity indices for different spectrographs.</p>
-<p>The method used is based on the original s-index (see <a class="reference external" href="https://ui.adsabs.harvard.edu/abs/1991ApJS...76..383D/abstract">Duncan et al. 1991</a>), where the flux in the cores of the activity sensitive lines is divided by reference regions.
-The flux determination, index calculation and errors are decribed in the Appendix A of <a class="reference external" href="https://ui.adsabs.harvard.edu/abs/2021A%26A...646A..77G/abstract">Gomes da Silva et al. (2021)</a>.</p>
+<p>The method used is based on the original s-index (see <a class="reference external" href="https://ui.adsabs.harvard.edu/abs/1991ApJS...76..383D/abstract">Duncan et al. 1991</a>), where the flux in the cores of the activity sensitive lines is divided by reference pseudo-continuum regions.
+The flux determination, index calculation and errors are described in the Appendix A of <a class="reference external" href="https://ui.adsabs.harvard.edu/abs/2021A%26A...646A..77G/abstract">Gomes da Silva et al. (2021)</a>.
+The errors are the photon noise, however there is an option to include extra noise, which is added in quadrature to the overall errors.</p>
 <p>Included are some of the most used activity proxies in the optical:</p>
 <ul class="simple">
-<li><p>CaII H&amp;K</p></li>
-<li><p>Halpha (using 0.6 and 1.6 angstrom bandpasses)</p></li>
+<li><p>CaII H&amp;K (S-index)</p></li>
+<li><p>H$alpha$ (using 0.6 and 1.6 angstrom bandpasses)</p></li>
 <li><p>NaI D2</p></li>
 <li><p>HeI</p></li>
 </ul>
 <p>A description of these indices is provided in <a class="reference external" href="https://ui.adsabs.harvard.edu/abs/2011A%26A...534A..30G/abstract">Gomes da Silva et al. (2011)</a>.
-Other indices can be added easily by editing the indices table (see “Adding new indices”).</p>
-<p>Currently implemented spectrographs are:</p>
+Other indices can be added easily by editing the indices table (see <a class="reference external" href="file:///Users/jgsilva/Astrophysics/Packages/ACTIN2/docs/_build/html/add_index.html">The indices table</a>).</p>
+<p>Implemented spectrographs:</p>
 <ul class="simple">
 <li><p>HARPS</p></li>
 <li><p>HARPS-N</p></li>
 <li><p>ESPRESSO</p></li>
-<li><p>SPIRou</p></li>
 </ul>
-<p>New instruments are easy to implement, see “Adding new instruments”.</p>
-<p>With a simple one line python code, it is possible to run ACTIN in a list of fits files and extract activity time series:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">actin</span> <span class="kn">import</span> <span class="n">ACTIN</span>
+<p>New instruments are easy to implement (see <a class="reference external" href="file:///Users/jgsilva/Astrophysics/Packages/ACTIN2/docs/_build/html/add_spec.html">Adding new spectrographs</a>).
+Activity indices can also be calculated for any spectrum if the wavelength and flux are available (see <a class="reference external" href="file:///Users/jgsilva/Astrophysics/Packages/ACTIN2/docs/_build/html/calc_act_general.html">Using ACTIN with any spectra</a>).</p>
+<p>With a simple one line python code, it is possible to run ACTIN on a list of fits files and extract a list of activity indices:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">actin2</span> <span class="kn">import</span> <span class="n">ACTIN</span>
+<span class="n">actin</span> <span class="o">=</span> <span class="n">ACTIN</span><span class="p">()</span>
 
-<span class="n">df</span> <span class="o">=</span> <span class="n">ACTIN</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">indices</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;I_CaII&#39;</span><span class="p">,</span> <span class="s1">&#39;I_NaI&#39;</span><span class="p">])</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">actin</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">indices</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;I_CaII&#39;</span><span class="p">,</span> <span class="s1">&#39;I_NaI&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
-<p>where <code class="docutils literal notranslate"><span class="pre">files</span></code> is the list of fits file paths to be read, <code class="docutils literal notranslate"><span class="pre">ìndices</span></code> is the list of index identification names (as in the indices table), and <code class="docutils literal notranslate"><span class="pre">df</span></code> is the pandas dataframe with the output timeseries including the selected headers such as radial-velocity, BJD, and activity data. See the tutorials for more information.</p>
-<p>ACTIN is being developed in a <a class="reference external" href="https://github.com/gomesdasilva/ACTIN">public repository on GitHub</a> so if you have any trouble, open an issue there.</p>
+<p>where <code class="docutils literal notranslate"><span class="pre">files</span></code> is the list of fits file paths to be read, <code class="docutils literal notranslate"><span class="pre">ìndices</span></code> is the list of index identification names (as in the indices table), and <code class="docutils literal notranslate"><span class="pre">df</span></code> is the pandas DataFrame with the output time series including the selected headers such as radial-velocity, Julian date, and activity data. See the tutorials for more information.</p>
+<p>ACTIN is being developed in a <a class="reference external" href="https://github.com/gomesdasilva/ACTIN">public repository on GitHub</a>, if you have any trouble, please open an issue there.</p>
+<div class="section" id="installation">
+<span id="id1"></span><h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>Clone the <a class="reference external" href="https://github.com/gomesdasilva/ACTIN">github repository</a> to a directory of your choice and install via:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> path/to/directory
+python setup.py install
+</pre></div>
+</div>
+</div>
 <div class="section" id="contents">
 <h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Getting started</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="quickstart.html#installation">Installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="quickstart.html#example-extracting-a-spectrum">Example: Extracting a spectrum</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getstarted.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="read_plot_spectrum.html">Reading and plotting a spectrum</a></li>
+<li class="toctree-l1"><a class="reference internal" href="calc_act_general.html">Using ACTIN with any spectra</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CaII_to_rhk.html">Converting CaII to <span class="math notranslate nohighlight">\(\log R'_\text{HK}\)</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="add_index.html">The indices table</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="add_index.html#Adding-new-indices">Adding new indices</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mod_indices_table.html">Modifying the indices table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="add_spec.html">Adding new spectrographs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="add_spec.html#Rules-to-create-spectrograph-classes:">Rules to create spectrograph classes:</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
 </ul>
 </div>
 </div>
-<div class="section" id="indices-and-tables">
-<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
-<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
-<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
-</ul>
-</div>
 <div class="section" id="license-attribution">
 <h2>License &amp; Attribution<a class="headerlink" href="#license-attribution" title="Permalink to this headline">¶</a></h2>
-<p>Copyright 2018-2021 João Gomes da Silva and contributors.</p>
-<p>ACTIN is being developed by João Gomes da Silva in a
-<a class="reference external" href="https://github.com/gomesdasilva/ACTIN">public GitHub repository</a>.
+<p>ACTIN is being developed in a
+<a class="reference external" href="https://github.com/gomesdasilva/ACTIN2">public GitHub repository</a>.
 The source code is made available under the terms of the MIT license.</p>
-<p>If you make use of this code, please cite <a class="reference external" href="https://ui.adsabs.harvard.edu/abs/2018JOSS....3..667G}">Gomes da Silva et al. (2018)</a>:</p>
+<p>If you make use of this code, please cite <a class="reference external" href="https://ui.adsabs.harvard.edu/abs/2018JOSS....3..667G}">Gomes da Silva et al. (2018)</a> and <a class="reference external" href="https://ui.adsabs.harvard.edu/abs/2021A%26A...646A..77G/abstract">Gomes da Silva et al. (2021)</a>:</p>
 <div class="highlight-tex notranslate"><div class="highlight"><pre><span></span> @ARTICLE<span class="nb">{</span>2018JOSS....3..667G,
     author = <span class="nb">{{</span>Gomes da Silva<span class="nb">}</span>, Jo<span class="nb">{</span><span class="k">\~</span>a<span class="nb">}</span>o and <span class="nb">{</span>Figueira<span class="nb">}</span>, Pedro and <span class="nb">{</span>Santos<span class="nb">}</span>, Nuno and <span class="nb">{</span>Faria<span class="nb">}</span>, Jo<span class="nb">{</span><span class="k">\~</span>a<span class="nb">}</span>o<span class="nb">}</span>,
      title = &quot;<span class="nb">{</span>ACTIN: A tool to calculate stellar activity indices<span class="nb">}</span>&quot;,
@@ -226,6 +272,26 @@ primaryClass = <span class="nb">{</span>astro-ph.IM<span class="nb">}</span>,
     adsurl = <span class="nb">{</span>https://ui.adsabs.harvard.edu/abs/2018JOSS....3..667G<span class="nb">}</span>,
    adsnote = <span class="nb">{</span>Provided by the SAO/NASA Astrophysics Data System<span class="nb">}</span>
 <span class="nb">}</span>
+
+
+
+@ARTICLE<span class="nb">{</span>2021A<span class="nb">&amp;</span>A...646A..77G,
+    author = <span class="nb">{{</span>Gomes da Silva<span class="nb">}</span>, J. and <span class="nb">{</span>Santos<span class="nb">}</span>, N.~C. and <span class="nb">{</span>Adibekyan<span class="nb">}</span>, V. and <span class="nb">{</span>Sousa<span class="nb">}</span>, S.~G. and <span class="nb">{</span>Campante<span class="nb">}</span>, T.~L. and <span class="nb">{</span>Figueira<span class="nb">}</span>, P. and <span class="nb">{</span>Bossini<span class="nb">}</span>, D. and <span class="nb">{</span>Delgado-Mena<span class="nb">}</span>, E. and <span class="nb">{</span>Monteiro<span class="nb">}</span>, M.~J.~P.~F.~G. and <span class="nb">{</span>de Laverny<span class="nb">}</span>, P. and <span class="nb">{</span>Recio-Blanco<span class="nb">}</span>, A. and <span class="nb">{</span>Lovis<span class="nb">}</span>, C.<span class="nb">}</span>,
+     title = &quot;<span class="nb">{</span>Stellar chromospheric activity of 1674 FGK stars from the AMBRE-HARPS sample. I. A catalogue of homogeneous chromospheric activity<span class="nb">}</span>&quot;,
+   journal = <span class="nb">{</span><span class="k">\aap</span><span class="nb">}</span>,
+  keywords = <span class="nb">{</span>catalogs, stars: activity, Astrophysics - Solar and Stellar Astrophysics, Astrophysics - Earth and Planetary Astrophysics<span class="nb">}</span>,
+      year = 2021,
+     month = feb,
+    volume = <span class="nb">{</span>646<span class="nb">}</span>,
+       eid = <span class="nb">{</span>A77<span class="nb">}</span>,
+     pages = <span class="nb">{</span>A77<span class="nb">}</span>,
+       doi = <span class="nb">{</span>10.1051/0004-6361/202039765<span class="nb">}</span>,
+archivePrefix = <span class="nb">{</span>arXiv<span class="nb">}</span>,
+    eprint = <span class="nb">{</span>2012.10199<span class="nb">}</span>,
+primaryClass = <span class="nb">{</span>astro-ph.SR<span class="nb">}</span>,
+    adsurl = <span class="nb">{</span>https://ui.adsabs.harvard.edu/abs/2021A<span class="nb">&amp;</span>A...646A..77G<span class="nb">}</span>,
+   adsnote = <span class="nb">{</span>Provided by the SAO/NASA Astrophysics Data System<span class="nb">}</span>
+<span class="nb">}</span>
 </pre></div>
 </div>
 </div>
@@ -239,7 +305,7 @@ primaryClass = <span class="nb">{</span>astro-ph.IM<span class="nb">}</span>,
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="quickstart.html" class="btn btn-neutral float-right" title="Getting started" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="getstarted.html" class="btn btn-neutral float-right" title="Getting started" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
     </div>
@@ -250,7 +316,7 @@ primaryClass = <span class="nb">{</span>astro-ph.IM<span class="nb">}</span>,
   <div role="contentinfo">
     <p>
         
-        &copy; Copyright 2021, J. Gomes da Silva
+        &copy; Copyright 2018-2022, J. Gomes da Silva
 
     </p>
   </div>

@@ -1,49 +1,12 @@
-import os
+import sys, os
 import importlib
+from importlib.machinery import SourceFileLoader
 import matplotlib.pylab as plt
 from astropy.io import fits
+import numpy as np
 
 from . import spectrographs
 from .spectrographs._spec_tools import printif
-
-
-# TODO: incorporate this function into ReadSpec for diagnostic
-def spec_ha_quality_check(file):
-    """Compare flux in centre of Halpha line to that of the wings to check if line is centred at rest frame and if is in emission or absorption.
-
-    Uses ACTIN 2 to obtain spectrum from fits file.
-
-    Args:
-        file (str): fits file path.
-    
-    Returns:
-        (str): "Absorption", "emission", or "BAD".
-    """
-    spec = actin.ReadSpec(file).spec
-    w = spec.spectrum['wave']
-    f = spec.spectrum['flux']
-
-    indtab = actin.IndTable().table
-    ctr = indtab[indtab.ln_id=='Ha06'].ln_ctr.values[0]
-
-    mask = (w >= ctr - 0.6/2) & (w <= ctr + 0.6/2)
-    f06 = np.sum(f[mask])
-    mask = (w >= ctr - 1.6/2) & (w <= ctr - 0.6/2)
-    f16r = np.sum(f[mask])
-    mask = (w >= ctr + 0.6/2) & (w <= ctr + 1.6/2)
-    f16l = np.sum(f[mask])
-
-    #print(f16l, f06, f16r)
-    absorption = (f06 < f16l) & (f06 < f16r)
-    emission = (f06 > f16l) & (f06 > f16r)
-
-    if absorption:
-        return "absorption"
-    elif emission:
-        return "emission"
-    else:
-        return "BAD"
-
 
 
 
@@ -51,69 +14,77 @@ class ReadSpec:
     """
     Extracts data from spectrograph fits files.
 
+    Args:
+        file (str): Fits file path containing the spectral data.
+        spec_class_in (str, None): Spectrograph class identification. Usefull if new spectrographs are added.
+        verb (bool): Turn verbose on/off.
+        **spec_kw (dict): Additional keyword arguments to be passed to thhe spectrograph class.
+
+    *Class attributes:*
+
     Attributes:
         spectrum (dict) : Dictionary containing wavelength and flux
         header (dict) : Dictionary containing selected headers from 
             the fits file
+        spec (object): The spectrograph class.
 
-    New features:
-
-    - RON added to flux noise
-    - (BERV correction with barycorr)
-    - Extracts CCF profile (and Bisector)
     """
-    # REQUIRED:
-    # TODO 6: Add SPIRou
-    # OPTIONAL:
-    # TODO: Include barycorr.py
-    # TODO: add option to input RV and BERV
-    # TODO: [DONE] Add option to retrieve spectra without being at rest frame
 
-    def __init__(self, file, obj_in=None, verb=False, spec_class_in=None, **spec_kw):
-        printif("Running ReadSpec", verb)
+    def __init__(self, file, verb=False, spec_class_in=None, spec_file_in=None, **spec_kw):
 
         # check if file exists:
         if not os.path.isfile(file):
-            raise FileNotFoundError(f"*** ERROR: File not found")
+            raise FileNotFoundError(f"{__class__.__name__} ERROR: File not found")
 
 
-        printif(f"loaded file: {file}", verb)
+        #printif(f"loaded file: {file}", verb)
 
-        # Get instrument:
         hdu = fits.open(file)
-        try:
-            instr = hdu[0].header['INSTRUME']
-        except KeyError:
-            try:
-                instr = hdu[0].header['HIERARCH ESO OBS INSTRUMENT']
-            except KeyError:
-                for instrument in spectrographs.__all__:
-                    if instrument in os.path.basename(file):
-                        instr = instrument
 
-        printif(f"loaded instr: {instr}", verb)
+        # using a spectrograph file outside ACTIN path:
+        if spec_file_in:
+            instr = os.path.basename(spec_file_in).split('.')[0]
+            spectrograph = SourceFileLoader(instr, spec_file_in).load_module().__getattribute__(instr)
 
-        # the spectrograph class is given as an input (to add new spectrographs easily):
-        if spec_class_in:
-            spectrograph = spec_class_in
         else:
+            # the spectrograph class is given as an input (to add new spectrographs easily):
+            if spec_class_in:
+                instr = spec_class_in
+            else:
+                try:
+                    instr = hdu[0].header['INSTRUME']
+                except KeyError:
+                    try:
+                        instr = hdu[0].header['HIERARCH ESO OBS INSTRUMENT']
+                    except KeyError:
+                        for instrument in spectrographs.__all__:
+                            if instrument in os.path.basename(file):
+                                instr = instrument
+
+            #printif(f"loaded instr: {instr}", verb)
+
+
             # import class from module with names 'instr': the instrument class
             try:
                 spectrograph = importlib.import_module("." + instr, "actin2.spectrographs").__getattribute__(instr)
             except ModuleNotFoundError:
-                raise ModuleNotFoundError(f"*** ERROR: Instrument '{instr}' not detected in 'spectrographs'. Available instruments are: {spectrographs.__all__}")
+                raise ModuleNotFoundError(f"{__class__.__name__} ERROR: Instrument '{instr}' not detected in 'spectrographs' directory. Available instruments are: {spectrographs.__all__}")
+
+            #print(spectrograph);sys.exit()
 
 
         # Create spectrograph object, this object will have the attributes given to him by the spectrograph class (can be different for different spectrographs: e.g. having bisector dictionary):
-        self.spec = spectrograph(file, hdu, obj_in, verb, **spec_kw)
+        self.spec = spectrograph(hdu, file=file, verb=verb, **spec_kw)
+
+        # Spectrum dictionary:
+        self.spectrum = self.spec.spectrum
+        # Headers dictionary:
+        self.headers = self.spec.headers
+
 
         self.spec.headers['file'] = os.path.basename(file)
 
         hdu.close()
-
-        #* Required attributes:
-        #self.spectrum = spectrograph.spectrum
-        #self.headers = spectrograph.headers   # headers for output
 
 
 
@@ -142,7 +113,7 @@ class ReadSpec:
             wave = spec[key_wave]
             flux = spec[key_flux]
         else:
-            raise ValueError(f"This is a 2D spectrum, 'order' value should be between 0 and {spec[key_flux].shape[0]-1} in the plot function")
+            raise ValueError(f"{sys._getframe().f_code.co_name} ERROR: This is a 2D spectrum, 'order' value should be between 0 and {spec[key_flux].shape[0]-1} in the plot function")
 
         ax.plot(wave, flux, **plt_kw)
 
@@ -156,7 +127,7 @@ class ReadSpec:
             profile = self.spec.ccf_profile['profile'][order]
             rv = self.spec.ccf_profile['rv'] # [km/s]
         except AttributeError:
-            raise AttributeError("This spectrum has no CCF profile")
+            raise AttributeError(f"{sys._getframe().f_code.co_name} ERROR: This spectrum has no CCF profile")
 
         ax.plot(rv, profile, **plt_kw)
 
@@ -170,7 +141,7 @@ class ReadSpec:
             ccf_bisector = self.spec.ccf_bisector['bisector']
             ccf_rv = self.spec.ccf_bisector['rv'] # [km/s]
         except AttributeError:
-            raise AttributeError("This spectrum has no CCF bisector")
+            raise AttributeError(f"{sys._getframe().f_code.co_name} ERROR: This spectrum has no CCF bisector")
 
         ax.plot(ccf_rv, ccf_bisector, **plt_kw)
 

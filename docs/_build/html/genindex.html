@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Index &mdash; ACTIN 2.0 documentation</title>
+  <title>Index &mdash; ACTIN 2.0 beta 7 documentation</title>
   
 
   
@@ -29,6 +29,9 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -60,6 +63,10 @@
           
             
             
+              <div class="version">
+                2.0 beta 7
+              </div>
+            
           
 
           
@@ -83,7 +90,13 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getstarted.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="read_plot_spectrum.html">Reading and plotting a spectrum</a></li>
+<li class="toctree-l1"><a class="reference internal" href="calc_act_general.html">Using ACTIN with any spectra</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CaII_to_rhk.html">Converting CaII to <span class="math notranslate nohighlight">\(\log R'_\text{HK}\)</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="add_index.html">The indices table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mod_indices_table.html">Modifying the indices table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="add_spec.html">Adding new spectrographs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
 </ul>
 
@@ -152,27 +165,81 @@
 <h1 id="index">Index</h1>
 
 <div class="genindex-jumpbox">
- <a href="#A"><strong>A</strong></a>
+ <a href="#_"><strong>_</strong></a>
+ | <a href="#A"><strong>A</strong></a>
+ | <a href="#C"><strong>C</strong></a>
  | <a href="#H"><strong>H</strong></a>
  | <a href="#I"><strong>I</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#P"><strong>P</strong></a>
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
+ | <a href="#T"><strong>T</strong></a>
  
 </div>
-<h2 id="A">A</h2>
+<h2 id="_">_</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api.html#actin2.ACTIN">ACTIN (class in actin2)</a>
+      <li><a href="api.html#actin2.calcindices.CalcIndices._calc_Rneg_ln">_calc_Rneg_ln() (actin2.calcindices.CalcIndices method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api.html#actin2.calcindices.CalcIndices._spec_order">_spec_order() (actin2.calcindices.CalcIndices method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="A">A</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api.html#actin2.actin2.ACTIN">ACTIN (class in actin2.actin2)</a>
+</li>
       <li>
-    actin2
+    actin2.actin2
 
       <ul>
-        <li><a href="api.html#module-actin2">module</a>
+        <li><a href="api.html#module-actin2.actin2">module</a>
+</li>
+      </ul></li>
+      <li>
+    actin2.calcindices
+
+      <ul>
+        <li><a href="api.html#module-actin2.calcindices">module</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    actin2.indtable
+
+      <ul>
+        <li><a href="api.html#module-actin2.indtable">module</a>
+</li>
+      </ul></li>
+      <li>
+    actin2.readspec
+
+      <ul>
+        <li><a href="api.html#module-actin2.readspec">module</a>
+</li>
+      </ul></li>
+      <li><a href="api.html#actin2.indtable.IndTable.add_line">add_line() (actin2.indtable.IndTable method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="C">C</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api.html#actin2.calcindices.CalcIndices.calc_flux_band">calc_flux_band() (actin2.calcindices.CalcIndices method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api.html#actin2.actin2.ACTIN.CalcIndices">CalcIndices (actin2.actin2.ACTIN attribute)</a>
+
+      <ul>
+        <li><a href="api.html#actin2.calcindices.CalcIndices">(class in actin2.calcindices)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -181,7 +248,7 @@
 <h2 id="H">H</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api.html#actin2.ReadSpec.header">header (actin2.ReadSpec attribute)</a>
+      <li><a href="api.html#actin2.readspec.ReadSpec.header">header (actin2.readspec.ReadSpec attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -189,10 +256,18 @@
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api.html#actin2.ACTIN.IndTable">IndTable (actin2.ACTIN attribute)</a>
+      <li><a href="api.html#actin2.calcindices.CalcIndices.indices">indices (actin2.calcindices.CalcIndices attribute)</a>
 
       <ul>
-        <li><a href="api.html#actin2.IndTable">(class in actin2)</a>
+        <li><a href="api.html#actin2.indtable.IndTable.indices">(actin2.indtable.IndTable attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api.html#actin2.actin2.ACTIN.IndTable">IndTable (actin2.actin2.ACTIN attribute)</a>
+
+      <ul>
+        <li><a href="api.html#actin2.indtable.IndTable">(class in actin2.indtable)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -205,7 +280,13 @@
     module
 
       <ul>
-        <li><a href="api.html#module-actin2">actin2</a>
+        <li><a href="api.html#module-actin2.actin2">actin2.actin2</a>
+</li>
+        <li><a href="api.html#module-actin2.calcindices">actin2.calcindices</a>
+</li>
+        <li><a href="api.html#module-actin2.indtable">actin2.indtable</a>
+</li>
+        <li><a href="api.html#module-actin2.readspec">actin2.readspec</a>
 </li>
       </ul></li>
   </ul></td>
@@ -214,31 +295,31 @@
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api.html#actin2.ReadSpec.plot">plot() (actin2.ReadSpec method)</a>
+      <li><a href="api.html#actin2.indtable.IndTable.params">params (actin2.indtable.IndTable attribute)</a>
+</li>
+      <li><a href="api.html#actin2.actin2.ACTIN.plot_index_line">plot_index_line() (actin2.actin2.ACTIN method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api.html#actin2.ACTIN.ProcessSpec">ProcessSpec (actin2.ACTIN attribute)</a>
-
-      <ul>
-        <li><a href="api.html#actin2.ProcessSpec">(class in actin2)</a>
+      <li><a href="api.html#actin2.actin2.ACTIN.plot_index_lines">plot_index_lines() (actin2.actin2.ACTIN method)</a>
 </li>
-      </ul></li>
+      <li><a href="api.html#actin2.readspec.ReadSpec.plot_spec">plot_spec() (actin2.readspec.ReadSpec method)</a>
+</li>
   </ul></td>
 </tr></table>
 
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api.html#actin2.ACTIN.ReadSpec">ReadSpec (actin2.ACTIN attribute)</a>
+      <li><a href="api.html#actin2.actin2.ACTIN.ReadSpec">ReadSpec (actin2.actin2.ACTIN attribute)</a>
 
       <ul>
-        <li><a href="api.html#actin2.ReadSpec">(class in actin2)</a>
+        <li><a href="api.html#actin2.readspec.ReadSpec">(class in actin2.readspec)</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api.html#actin2.ACTIN.run">run() (actin2.ACTIN method)</a>
+      <li><a href="api.html#actin2.actin2.ACTIN.run">run() (actin2.actin2.ACTIN method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -246,7 +327,19 @@
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api.html#actin2.ReadSpec.spectrum">spectrum (actin2.ReadSpec attribute)</a>
+      <li><a href="api.html#actin2.readspec.ReadSpec.spec">spec (actin2.readspec.ReadSpec attribute)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api.html#actin2.readspec.ReadSpec.spectrum">spectrum (actin2.readspec.ReadSpec attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="T">T</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api.html#actin2.indtable.IndTable.table">table (actin2.indtable.IndTable attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -264,7 +357,7 @@
   <div role="contentinfo">
     <p>
         
-        &copy; Copyright 2021, J. Gomes da Silva
+        &copy; Copyright 2018-2022, J. Gomes da Silva
 
     </p>
   </div>

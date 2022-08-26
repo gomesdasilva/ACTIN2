@@ -37,30 +37,6 @@ def filter_headers(OUT_HDR_KEYS, all_hdr_dict):
     return headers
 
 
-#! Remove from this file: (add as post-processing)
-def date_to_jd(dd_mm_yyyy):
-    """Date format must be DD/MM/YYYY"""
-    day, month, year = dd_mm_yyyy.split("/")
-    ts = pd.Timestamp(int(year), int(month), int(day))
-    return ts.to_julian_date()
-
-#! Remove from this file: (add as post-processing)
-def separate_instr_by_bjd(bjd_sep, bjd, instr, suff_pre='pre', suff_pos='pos'):
-    if isinstance(instr, list):
-        for i in instr:
-            if bjd < bjd_sep:
-                instr_new = i + suff_pre
-            if bjd >= bjd_sep:
-                instr_new = i + suff_pos
-    else:
-        if bjd < bjd_sep:
-                instr_new = instr + suff_pre
-        if bjd >= bjd_sep:
-            instr_new = instr + suff_pos
-    return instr_new
-
-
-# Just for HARPS/HARPN
 def read_fits(fits_file=None, hdu=None, instr=None, calc_x=True):
     if fits_file:
         hdu = fits.open(fits_file)
@@ -109,19 +85,18 @@ def calc_fits_x_2d(hdr, obs):
     return wave_raw
 
 
-# Read fits header data usibg 'headers' dictionary:
-def read_headers(hdr, headers, data=None):
+
+
+def read_headers(hdr, headers, data=None, verb=False):
     """Read fits header data using 'headers' dictionary.
     Result is included in 'data' dictionary if not 'None'. If 'None' a new dictionary is returned"""
     if not data:
         data = {}
 
     for key, hdr_id in zip(headers.keys(), headers.values()):
-        # if not hdr:
-        #     data[key] = np.nan
-        #     continue
         try:
             data[key] = hdr[hdr_id]
         except KeyError:
+            printif(f"Header {key} not in fits file", verb)
             data[key] = None
     return data

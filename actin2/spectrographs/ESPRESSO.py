@@ -4,7 +4,7 @@ import glob
 import pandas as pd
 from astropy.io import fits
 
-from ._spec_tools import printif, read_fits, read_headers, wave_star_rest_frame, wave_corr_berv
+from ._spec_tools import printif, read_headers, wave_star_rest_frame
 
 
 
@@ -22,55 +22,35 @@ spec_hdrs = dict(
     cont_err = 'HIERARCH ESO QC CCF CONTRAST ERROR', # CCF contrast error [%] 
     bis      = 'HIERARCH ESO QC CCF BIS SPAN', # CCF bisector span [km/s]     
     bis_err  = 'HIERARCH ESO QC CCF BIS SPAN ERROR', # CCF bisector span err
+    exptime  = 'EXPTIME',
+    snr50    = 'HIERARCH ESO QC ORDER50 SNR',
+    spec_rv  = 'HIERARCH ESO OCS OBJ RV',
+    ra       = 'RA',      # [deg]
+    dec      = 'DEC',     # [deg]
+    prog_id  = 'HIERARCH ESO OBS PROG ID',
+    pi_coi   = 'PI-COI',
+    ftype    = 'HIERARCH ESO PRO CATG',
+    drs_id   = 'HIERARCH ESO PRO REC1 DRS ID',
+    ccf_mask = 'HIERARCH ESO QC CCF MASK',
+
 )
 
-# SP_HDRS = dict(
-#     instr = 'INSTRUME',
-#     obj = 'OBJECT',
-#     bjd = 'HIERARCH ESO QC BJD',
-#     date_obs = 'DATE-OBS',
-#     exptime = 'EXPTIME',
-#     snr60 = 'HIERARCH ESO QC ORDER85 SNR',
-#     airmass_start = 'HIERARCH ESO TEL3 AIRM START',
-#     airmass_end = 'HIERARCH ESO TEL3 AIRM END',
-#     seeing_start = 'HIERARCH ESO TEL3 AMBI FWHM START', # [arcsec]
-#     seeing_end = 'HIERARCH ESO TEL3 AMBI FWHM END', # [arcsec]
-#     ra = 'RA',      # [deg]
-#     dec = 'DEC',     # [deg]
-#     prog_id = 'HIERARCH ESO OBS PROG ID',
-#     pi_coi = 'PI-COI',
-#     ftype = 'HIERARCH ESO PRO CATG',
-#     drs_id = 'HIERARCH ESO PRO REC1 DRS ID',
-#     targ_rv = 'HIERARCH ESO OCS OBJ RV',
-#     rv_step = 'HIERARCH ESO RV STEP', #=     0.5 / Coordinate increment per pixel
-#     rv_ref_pix = 'HIERARCH ESO RV START', #= -21.11 / Coordinate at reference pixel
-#     berv = 'HIERARCH ESO QC BERV', # [km/s]
-#     rv = 'HIERARCH ESO QC CCF RV', #= -1.19840358654132 / Radial velocity [km/s]        
-#     rv_err = 'HIERARCH ESO QC CCF RV ERROR', #= 0.00053474023623152 / Uncertainty on radial veloc
-#     fwhm = 'HIERARCH ESO QC CCF FWHM', #= 9.4897932752335 / CCF FWHM [km/s]                  
-#     fwhm_err = 'HIERARCH ESO QC CCF FWHM ERROR', #= 0.00106948047246304 / Uncertainty on CCF FWHM [
-#     cont = 'HIERARCH ESO QC CCF CONTRAST', #= 59.8806426078076 / CCF contrast %                
-#     cont_err = 'HIERARCH ESO QC CCF CONTRAST ERROR', #= 0.00674842708267666 / CCF contrast error % 
-#     continuum = 'HIERARCH ESO QC CCF CONTINUUM', #= 2560440.01971191 / CCF continuum level [e-]     
-#     mask = 'HIERARCH ESO QC CCF MASK', #= 'F9      ' / CCF mask used                           
-#     flux_asym = 'HIERARCH ESO QC CCF FLUX ASYMMETRY', #= 0.0126966418595723 / CCF asymmetry (km/s)  
-#     flux_asym_err = 'HIERARCH ESO QC CCF FLUX ASYMMETRY ERROR', #= 0.000921109029304877 / CCF asymmetry 
-#     bis = 'HIERARCH ESO QC CCF BIS SPAN', #= -0.01440933698031 / CCF bisector span (km/s)     
-#     bis_err = 'HIERARCH ESO QC CCF BIS SPAN ERROR', #= 0.00106948047246304 / CCF bisector span err
-#     blaze_file = "HIERARCH ESO PRO REC2 CAL12 NAME"
-# )
+ccf_hdrs = dict()
 
+bis_hdrs = dict()
 
 
 
 class ESPRESSO:
 
-    def __init__(self, file, hdu, obj_in=None, verb=False, save_spec=False, save_ccf=False, save_bis=False, output_path=None, add_spec_hdrs=None, add_ccf_hdrs=None, add_bis_hdrs=None, get_bis=True, get_ccf=True):
+    def __init__(self, hdu, file=None, rv_in="ccf", berv_in=None, verb=False, save_spec=False, save_ccf=False, save_bis=False, output_path=None, add_spec_hdrs=None, add_ccf_hdrs=None, add_bis_hdrs=None, get_bis=True, get_ccf=True):
         """Reads ESPRESSO S1D and S2D fits files and extracts the spectrum and relevant header data.
 
         Args:
             file (str): Spectrum fits file with respective path.
-            hdu ([type]): HDU of the spectrum fits file.
+            hdu (fits HDU): HDU of the spectrum fits file.
+            rv_in (str, float): RV to calibrate wavelength to stellar rest frame. If 'ccf' (default) use the CCF RV, if 'spec' use the spectrum headers RV, if float use input RV (in km/s).
+            berv_in (None, float): Input BERV value to correct wavelength (m/s). If 'None' use HARPS DRS BERV.
             obj_in (str): Identification of the target to override the target ID stored
                 in the fits file.
             verb (bool, optional): If True prints information. Defaults to False.
@@ -89,14 +69,18 @@ class ESPRESSO:
             add_bis_hdrs (dict, optional): Dictionary with headers to be extracted from the
                 'bis' fits file. Defaults to None.
         """
-        # Get additional headers:
-        if add_spec_hdrs:
+        # Get additional headers for each file type:
+        if add_spec_hdrs and isinstance(add_spec_hdrs, dict):
             spec_hdrs.update(add_spec_hdrs)
+        if add_ccf_hdrs and isinstance(add_ccf_hdrs, dict):
+            ccf_hdrs.update(add_ccf_hdrs)
+        if add_bis_hdrs and isinstance(add_bis_hdrs, dict):
+            bis_hdrs.update(add_bis_hdrs)
         
         flg = 'OK'
         instr = 'ESPRESSO'
 
-        printif("Reading spectrum file", verb)
+        printif(f"Reading spectrum file: {file}", verb)
 
         # Create dictionary to hold the spectrum data
         spec = dict()
@@ -105,7 +89,7 @@ class ESPRESSO:
         spec, hdr = self._read_fits_espresso(hdu=hdu)
 
         # Get spectrum selected header values:
-        headers = read_headers(hdr, spec_hdrs, data=None)
+        headers = read_headers(hdr, spec_hdrs, data=None, verb=verb)
 
         # Get target:
         headers['obj'] = self._get_target(hdr, instr, verb)
@@ -113,6 +97,7 @@ class ESPRESSO:
         # Get median SNR:
         snr_med, _ = self._get_snr(hdr)
         headers['snr_med'] = snr_med
+
 
         # if no instrument keyword is present in fits file:
         if headers['instr'] is None:
@@ -124,20 +109,46 @@ class ESPRESSO:
         if len(spec['flux_raw'].shape) == 2:
             headers['ftype'] = 'S2D'
 
-        for key in headers:
-            if key in ['rv', 'rv_err', 'fwhm', 'bis', 'berv']:
-                headers[key] = headers[key]*1e3 # to m/s
+
+        # The RV used to calibrate the wavelength to the stellar rest frame can come from the CCF, the spectrum headers or as input:
+        if rv_in == 'ccf':
+            headers['rv_wave_corr'] = headers['rv']
+            headers['rv_flg'] = 'CCF'
+
+        elif rv_in == 'spec' and 'spec_rv' in headers:
+            headers['rv_wave_corr'] = headers['spec_rv']
+            headers['rv_flg'] = 'SPEC'
+
+        elif isinstance(rv_in, float):
+            headers['rv_wave_corr'] = rv_in # km/s
+            headers['rv_flg'] = 'INPUT'
+
+        else:
+            print(f"{__class__.__name__} WARNING: could not calibrate wavelength to stellar rest frame, 'rv_in' input was '{rv_in}'")
+            headers['rv_flg'] = 'NoRV'
+            headers['rv_wave_corr'] = None
+            self.spectrum = spec
+            self.headers = headers
+            return
+
+
+        keys = ['rv', 'berv', 'ccf_noise', 'fwhm', 'spec_rv', 'rv_wave_corr']
+        for key in keys:
+            if key in headers:
+                try:
+                    headers[key] *= 1e3 # to m/s
+                except TypeError:
+                    continue
 
 
         # shift wave to target rest frame:
-        spec['wave'] = wave_star_rest_frame(spec['wave_raw'], headers['rv'])
+        spec['wave'] = wave_star_rest_frame(spec['wave_raw'], headers['rv_wave_corr'])
 
+        # flux already deblazed in S1D and S2D files
         spec['flux'] = spec['flux_raw']
+
         headers['spec_flg'] = 'OK'
 
-        # max_RON = 8 # [e-/pix] from the pipeline manual, pag. 16
-        # CONAD = 1.1 # [e-/ADU] from the pipeline manual, pag. 16
-        # headers['noise'] = max_RON * CONAD
 
         # CCF profile data:
         if get_ccf:
@@ -207,7 +218,7 @@ class ESPRESSO:
             try:
                 obj = hdr[f'{obs} OBS TARG NAME']
             except KeyError:
-                printif("*** ERROR: Cannot identify object.", verb)
+                printif(f"{__class__.__name__} ERROR: Cannot identify object.", verb)
                 return None
 
         return obj
@@ -244,7 +255,7 @@ class ESPRESSO:
                 wave_raw = hdu[1].data['wavelength_air'],
             )
 
-        elif hdr['HIERARCH ESO PRO CATG'] == 'S2D_A':
+        elif hdr['HIERARCH ESO PRO CATG'] in ['S2D_A', 'S2D_BLAZE_A']:
             spec = dict(
                 flux_raw = hdu[1].data, # blazed
                 flux_err = hdu[2].data,
@@ -252,7 +263,7 @@ class ESPRESSO:
             )
         
         else:
-            raise ValueError(f"ERROR: File '{hdr['HIERARCH ESO PRO CATG']}' not implemented")
+            raise ValueError(f"{__class__.__name__} ERROR: File '{hdr['HIERARCH ESO PRO CATG']}' not implemented")
 
         hdu.close()
 
@@ -269,7 +280,7 @@ class ESPRESSO:
         flg = "OK"
 
         if len(file) == 0:
-            err_msg = f"*** ERROR: {os.path.basename(__file__)}: No {type.upper()} file Found. Searched filename: {os.path.basename(search_string)}"
+            err_msg = f"{__class__.__name__} ERROR: {os.path.basename(__file__)}: No {type.upper()} file Found. Searched filename: {os.path.basename(search_string)}"
             flg = f"No{type.upper()}file"
             file = None
 
@@ -281,13 +292,14 @@ class ESPRESSO:
             file = file[0]
 
         elif len(file) > 1:
-            err_msg = f"*** WARNING: Number of {type.upper()} files > 1. Using the first in the list. File used: {os.path.basename(file[0])}"
+            err_msg = f"{__class__.__name__} WARNING: Number of {type.upper()} files > 1. Using the first in the list. File used: {os.path.basename(file[0])}"
 
             printif(err_msg, verb)
 
             file = file[0]
 
         return file, flg
+
 
 
     def _save_object_data(self, df, obj, save_name, output_path, verb):

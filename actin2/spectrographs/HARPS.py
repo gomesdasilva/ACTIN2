@@ -5,12 +5,7 @@ import pandas as pd
 
 from ._spec_tools import printif, read_fits, read_headers, wave_star_rest_frame, wave_corr_berv
 
-"""
-NOTE: RV error is quadratic sum of:
-HIERARCH ESO DRS CAL TH ERROR [m/s]
-HIERARCH ESO DRS CCF NOISE [km/s]
-HIERARCH ESO DRS DRIFT NOISE [m/s]
-"""
+
 obs = 'ESO'
 
 spec_hdrs = dict(
@@ -27,38 +22,38 @@ spec_hdrs = dict(
     prog_id     = f'HIERARCH {obs} OBS PROG ID',
     pi_coi      = f'HIERARCH {obs} OBS PI-COI NAME',
     cal_th_err  = f'HIERARCH {obs} DRS CAL TH ERROR', # estim err on wave sol(m/s)
-    berv        = f"HIERARCH {obs} DRS BERV",        # [km/s]
-    targ_rv     = f'HIERARCH {obs} TEL TARG RADVEL',  # [km/s]
-    #drift_rv    = f"HIERARCH {obs} DRS DRIFT RV USED" # Drift rv [m/s]
+    berv        = f"HIERARCH {obs} DRS BERV",         # [km/s]
+    spec_rv     = f'HIERARCH {obs} TEL TARG RADVEL',  # [km/s]
 )
 
 ccf_hdrs = dict(
-    rv          = f"HIERARCH {obs} DRS CCF RVC",     # [km/s] (drift corrected)
-    dvrms       = f"HIERARCH {obs} DRS DVRMS",       # [m/s]
-    #berv        = f"HIERARCH {obs} DRS BERV",        # [km/s]
-    ccf_noise   = f'HIERARCH {obs} DRS CCF NOISE',   # [km/s] Photon noise on CCF RV
-    fwhm        = f'HIERARCH {obs} DRS CCF FWHM',    # [km/s]
+    rv          = f"HIERARCH {obs} DRS CCF RVC",      # [km/s] (drift corrected)
+    dvrms       = f"HIERARCH {obs} DRS DVRMS",        # [m/s]
+    ccf_noise   = f'HIERARCH {obs} DRS CCF NOISE',    # [km/s] Photon noise on CCF RV
+    fwhm        = f'HIERARCH {obs} DRS CCF FWHM',     # [km/s]
     cont        = f'HIERARCH {obs} DRS CCF CONTRAST', # [%]
-    mask        = f"HIERARCH {obs} DRS CCF MASK",
-    drift_noise = f'HIERARCH {obs} DRS DRIFT NOISE', # Th Drift photon noise [m/s]
-    drift_rv    = f"HIERARCH {obs} DRS DRIFT RV USED", # Drift rv [m/s]
+    ccf_mask    = f"HIERARCH {obs} DRS CCF MASK",
+    drift_noise = f'HIERARCH {obs} DRS DRIFT NOISE',  # Th Drift photon noise [m/s]
+    drift_rv    = f"HIERARCH {obs} DRS DRIFT RV USED",# Drift rv [m/s]
 )
 
 bis_hdrs = dict(
     bis         = f'HIERARCH {obs} DRS BIS SPAN' # [km/s]
-    )
+)
 
 
 
 
 class HARPS:
 
-    def __init__(self, file, hdu, obj_in=None, verb=False, save_spec=False, save_ccf=False, save_bis=False, output_path=None, add_spec_hdrs=None, add_ccf_hdrs=None, add_bis_hdrs=None, get_bis=True, get_ccf=True):
+    def __init__(self, hdu, file=None, rv_in="ccf", berv_in=None, verb=False, save_spec=False, save_ccf=False, save_bis=False, output_path=None, add_spec_hdrs=None, add_ccf_hdrs=None, add_bis_hdrs=None, get_bis=True, get_ccf=True):
         """Reads HARPS s1d and e2ds fits files and extracts the spectrum and relevant header data.
 
         Args:
-            file ([type]): Spectrum fits file with respective path.
-            hdu ([type]): HDU of the spectrum fits file.
+            file (str): Spectrum fits file with respective path.
+            hdu (fits HDU): HDU of the spectrum fits file.
+            rv_in (str, float): RV to calibrate wavelength to stellar rest frame. If 'ccf' (default) use the CCF RV, if 'spec' use the spectrum headers RV, if float use input RV (in km/s).
+            berv_in (None, float): Input BERV value to correct wavelength (m/s). If 'None' use HARPS DRS BERV.
             obj_in (str): Identification of the target to override the target ID stored
                 in the fits file.
             verb (bool, optional): If True prints information. Defaults to False.
@@ -77,18 +72,18 @@ class HARPS:
             add_bis_hdrs (dict, optional): Dictionary with headers to be extracted from the
                 'bis' fits file. Defaults to None.
         """
-        # Get additional headers:
-        if add_spec_hdrs:
+        # Get additional headers for each file type:
+        if add_spec_hdrs and isinstance(add_spec_hdrs, dict):
             spec_hdrs.update(add_spec_hdrs)
-        if add_ccf_hdrs:
+        if add_ccf_hdrs and isinstance(add_ccf_hdrs, dict):
             ccf_hdrs.update(add_ccf_hdrs)
-        if add_bis_hdrs:
+        if add_bis_hdrs and isinstance(add_bis_hdrs, dict):
             bis_hdrs.update(add_bis_hdrs)
 
         flg = 'OK'
         instr = 'HARPS'
 
-        printif("Reading spectrum file", verb)
+        printif(f"Reading spectrum file: {file}", verb)
 
         # Create dictionary to hold the spectrum data
         spec = dict()
@@ -97,7 +92,7 @@ class HARPS:
         spec['wave_raw'], spec['flux_raw'], hdr = read_fits(hdu=hdu, instr=instr)
 
         # Get spectrum selected header values:
-        headers = read_headers(hdr, spec_hdrs, data=None)
+        headers = read_headers(hdr, spec_hdrs, data=None, verb=verb)
 
         # Get target:
         headers['obj'] = self._get_target(hdr, instr, verb)
@@ -106,9 +101,6 @@ class HARPS:
         snr_med, _ = self._get_snr(hdr, instr)
         headers['snr_med'] = snr_med
 
-        # Add a different target name as 'obj_in':
-        if obj_in:
-            headers['obj_in'] = obj_in
 
         # if no instrument keyword is present in fits file:
         if headers['instr'] is None:
@@ -120,49 +112,77 @@ class HARPS:
         if len(spec['flux_raw'].shape) == 2:
             headers['ftype'] = 'e2ds'
 
-        # CCF profile data:
+
+        # The RV used to calibrate the wavelength to the stellar rest frame can come from the CCF, the spectrum headers or as input:
+        if rv_in == 'ccf':
+            get_ccf = True
+            headers['rv_flg'] = 'CCF'
+
+        elif rv_in == 'spec' and 'spec_rv' in headers:
+            headers['rv_wave_corr'] = headers['spec_rv']
+            headers['rv_flg'] = 'SPEC'
+
+        elif isinstance(rv_in, float):
+            headers['rv_wave_corr'] = rv_in # km/s
+            headers['rv_flg'] = 'INPUT'
+
+        else:
+            print(f"{__class__.__name__} WARNING: could not calibrate wavelength to stellar rest frame, 'rv_in' input was '{rv_in}'")
+            headers['rv_flg'] = 'NoRV'
+            headers['rv_wave_corr'] = None
+            self.spectrum = spec
+            self.headers = headers
+            return
+
+
+
+        # CCF data:
         if get_ccf:
-            printif("Reading CCF file", verb)
             ccf_file, _ = self._search_file(file, headers['ftype'], type='ccf', verb=verb)
 
+            if ccf_file:
+                ccf_profile = dict()
 
-        # TODO: make option to get RV from spectra files and as an INPUT!
-        if get_ccf and ccf_file:
-            ccf_profile = dict()
+                # Get CCF profile:
+                ccf_profile['rv'], ccf_profile['profile'], ccf_hdr = read_fits(ccf_file, instr=instr)
 
-            ccf_profile['rv'], ccf_profile['profile'], ccf_hdr = read_fits(ccf_file, instr=instr)
-            #ccf_profile['profile'] = ccf_profile['profile'][-1] # co-added profile
+                # Get CCF file headers:
+                headers = read_headers(ccf_hdr, ccf_hdrs, data=headers)
 
-            headers = read_headers(ccf_hdr, ccf_hdrs, data=headers)
+                if rv_in == 'ccf':
+                    headers['rv_wave_corr'] = headers['rv']
 
-            # for key in headers.keys():
-            #     if key in ['rv', 'berv', 'ccf_noise', 'fwhm']:
-            #         headers[key] *= 1e3 # to m/s
+                self.ccf_profile = ccf_profile
+            else:
+                printif(f"{__class__.__name__} WARNING: No CCF file found, trying SPEC RV instead", verb=verb)
 
-            self.ccf_profile = ccf_profile
+                if 'spec_rv' in headers:
+                    headers['rv_wave_corr'] = headers['spec_rv']
+                    headers['rv_flg'] = 'SPEC'
 
-        # elif not ccf_file:
-        #     printif(f"*** ERROR: Spectrum {file} ignored.", verb=verb)
-        #     self.spectrum = spec
-        #     self.headers = headers
-        #     return
+                else:
+                    print(f"{__class__.__name__} WARNING: could not calibrate wavelength to stellar rest frame, rv_in input was {rv_in}")
+                    headers['rv_flg'] = 'NoRV'
+                    self.spectrum = spec
+                    self.headers = headers
+                    return
+
 
         # CCF bisector data:
         if get_bis:
-            printif("Reading BIS file", verb)
             bis_file, _ = self._search_file(file, headers['ftype'], type='bis', verb=verb)
 
-        if get_bis and bis_file:
-            ccf_bisector = dict()
+            if bis_file:
+                ccf_bisector = dict()
 
-            ccf_bisector['bisector'], ccf_bisector['rv'], bis_hdr = read_fits(bis_file, instr=instr)
+                ccf_bisector['bisector'], ccf_bisector['rv'], bis_hdr = read_fits(bis_file, instr=instr)
 
-            headers = read_headers(bis_hdr, bis_hdrs, data=headers)
+                headers = read_headers(bis_hdr, bis_hdrs, data=headers)
 
-            self.ccf_bisector = ccf_bisector
+                self.ccf_bisector = ccf_bisector
 
 
-        keys = ['rv', 'berv', 'ccf_noise', 'fwhm', 'targ_rv']
+        keys = ['rv', 'berv', 'ccf_noise', 'fwhm', 'spec_rv', 'rv_wave_corr']
         for key in keys:
             if key in headers:
                 try:
@@ -170,41 +190,25 @@ class HARPS:
                 except TypeError:
                     continue
 
-        
-        # Calibrate wavelength to stellar rest frame:
-        # TODO: star_rest_frame and corr_berv should not be dependent on ccf file
-        # TODO: should have option to get spectrum without star rest frame
-        if 'rv' not in headers.keys():
-            rv = headers['targ_rv']
-        else:
-            rv = headers['rv']
 
         # Calibrate wavelength to stellar rest frame:
         if headers['ftype'] == 's1d' and not file.endswith("_rv.fits"):
-            spec['wave'] = wave_star_rest_frame(spec['wave_raw'], rv)
-            #spec['wave'] = spec['wave_raw']
-            #spec['wave'] = wave_corr_berv(spec['wave'], headers['berv'])
+            spec['wave'] = wave_star_rest_frame(spec['wave_raw'], headers['rv_wave_corr'])
+
         elif headers['ftype'] == 's1d' and file.endswith("_rv.fits"):
             spec['wave'] = spec['wave_raw']
-        elif headers['ftype'] == 'e2ds' and 'berv' in headers:
-            spec['wave'] = wave_corr_berv(spec['wave_raw'], headers['berv'])
+
+        elif headers['ftype'] == 'e2ds':
+            if 'berv' in headers and berv_in is None:
+                spec['wave'] = wave_corr_berv(spec['wave_raw'], headers['berv'])
+            if isinstance(berv_in, float):
+                headers['berv_in'] = berv_in
+                spec['wave'] = wave_corr_berv(spec['wave_raw'], headers['berv_in'])
+
         else:
             flg = "WaveNotCorr"
-            printif("*** WARNING: Cannot shift spectrum to target rest frame", verb)
+            print(f"{__class__.__name__} WARNING: Cannot shift spectrum to target rest frame")
 
-        # if get_ccf and ccf_file:
-        #     rv = headers['rv']
-        #     if headers['ftype'] == 's1d' and not np.isnan(rv):
-        #         spec['wave'] = wave_star_rest_frame(spec['wave_raw'], rv)
-
-        #     elif headers['ftype'] == 'e2ds' and not np.isnan(rv) and 'berv' in headers:
-        #         spec['wave'] = wave_corr_berv(spec['wave_raw'], headers['berv'])
-        #         spec['wave'] = wave_star_rest_frame(spec['wave'], rv)
-        # else:
-        #     # TODO: add option to input low precision RV (IMPORTANT!)
-        #     rv = np.nan
-        #     flg = "WaveNotCorr"
-        #     printif("*** WARNING: Cannot shift spectrum to target rest frame", verb)
 
         # Flux photon noise:
         spec['flux_err'] = np.sqrt(abs(spec['flux_raw']))
@@ -213,19 +217,13 @@ class HARPS:
         if headers['ftype'] == 's1d':
             # Already deblazed
             spec['flux'] = spec['flux_raw']
-            #del spec['flux_raw']
 
         if headers['ftype'] == 'e2ds':
             blaze_file = hdr['HIERARCH ESO DRS BLAZE FILE']
             spec['flux'], flg = self._deblaze(file, spec['flux_raw'], blaze_file, flg, instr)
 
 
-        
-        # sigdet = hdr['HIERARCH ESO DRS CCD SIGDET'] #CCD Readout Noise [e-] 
-        # gain = hdr['HIERARCH ESO DRS CCD CONAD']  #CCD conversion factor [e-/ADU]
-        # headers['noise'] = sigdet * gain # Read-Out-Noise per pixel
-
-        if ccf_file:
+        if get_ccf and ccf_file:
             try:
                 headers['rv_err'] = np.sqrt(headers['ccf_noise']**2 + headers['drift_noise']**2 + headers['cal_th_err']**2)
             except:
@@ -233,8 +231,10 @@ class HARPS:
                 flg = "NoRVerr"
         else:
             headers['rv_err'] = 0.0
+            flg = "NoRVerr"
 
         headers['spec_flg'] = flg
+
 
 
         # save spectrum:
@@ -273,8 +273,8 @@ class HARPS:
 
 
         # output:
-        self.spectrum = spec      # spectrum dict (must have 'wave' and 'flux')
-        self.headers = headers    # all selected headers dict
+        self.spectrum = spec      # spectrum dict (must have 'wave' and 'flux' keys)
+        self.headers = headers    # ACTIN and selected headers dict
 
 
     def _get_target(self, hdr, instr, verb):
@@ -292,7 +292,7 @@ class HARPS:
             try:
                 obj = hdr[f'{obs} OBS TARG NAME']
             except KeyError:
-                printif("*** ERROR: Cannot identify object.", verb)
+                printif(f"{__class__.__name__} WARNING: Cannot identify object.", verb)
                 return None
 
         return obj
@@ -329,7 +329,7 @@ class HARPS:
         flg = "OK"
 
         if len(file) == 0:
-            err_msg = f"*** ERROR: {os.path.basename(__file__)}: No {type.upper()} file Found. Searched filename: {os.path.basename(search_string)}"
+            err_msg = f"{__class__.__name__} WARNING: {os.path.basename(__file__)}: No {type.upper()} file Found. Searched filename: {os.path.basename(search_string)}"
             flg = f"No{type.upper()}file"
             file = None
 
@@ -341,7 +341,7 @@ class HARPS:
             file = file[0]
 
         elif len(file) > 1:
-            err_msg = f"*** WARNING: Number of {type.upper()} files > 1. Using the first in the list. File used: {os.path.basename(file[0])}"
+            err_msg = f"{__class__.__name__} WARNING: Number of {type.upper()} files > 1. Using the first in the list. File used: {os.path.basename(file[0])}"
 
             printif(err_msg, verb)
 

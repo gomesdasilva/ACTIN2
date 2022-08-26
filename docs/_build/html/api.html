@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>API &mdash; ACTIN 2.0 documentation</title>
+  <title>API &mdash; ACTIN 2.0 beta 7 documentation</title>
   
 
   
@@ -29,13 +29,16 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="Getting started" href="quickstart.html" /> 
+    <link rel="prev" title="Adding new spectrographs" href="add_spec.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -61,6 +64,10 @@
           
             
             
+              <div class="version">
+                2.0 beta 7
+              </div>
+            
           
 
           
@@ -84,7 +91,13 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getstarted.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="read_plot_spectrum.html">Reading and plotting a spectrum</a></li>
+<li class="toctree-l1"><a class="reference internal" href="calc_act_general.html">Using ACTIN with any spectra</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CaII_to_rhk.html">Converting CaII to <span class="math notranslate nohighlight">\(\log R'_\text{HK}\)</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="add_index.html">The indices table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mod_indices_table.html">Modifying the indices table</a></li>
+<li class="toctree-l1"><a class="reference internal" href="add_spec.html">Adding new spectrographs</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">API</a></li>
 </ul>
 
@@ -151,64 +164,128 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="api">
-<span id="id1"></span><h1>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h1>
-<span class="target" id="module-actin2"></span><dl class="py class">
-<dt id="actin2.ACTIN">
-<em class="property">class </em><code class="sig-prename descclassname">actin2.</code><code class="sig-name descname">ACTIN</code><a class="headerlink" href="#actin2.ACTIN" title="Permalink to this definition">¶</a></dt>
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="api">
+<h1>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h1>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#actin2.actin2.ACTIN" title="actin2.actin2.ACTIN"><code class="xref py py-obj docutils literal notranslate"><span class="pre">actin2.actin2.ACTIN</span></code></a>()</p></td>
+<td><p>The ACTIN class.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#actin2.readspec.ReadSpec" title="actin2.readspec.ReadSpec"><code class="xref py py-obj docutils literal notranslate"><span class="pre">actin2.readspec.ReadSpec</span></code></a>(file[, verb, …])</p></td>
+<td><p>Extracts data from spectrograph fits files.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#actin2.indtable.IndTable" title="actin2.indtable.IndTable"><code class="xref py py-obj docutils literal notranslate"><span class="pre">actin2.indtable.IndTable</span></code></a>([table_csv, verb])</p></td>
+<td><p>Class to manipulate the indices table.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#actin2.calcindices.CalcIndices" title="actin2.calcindices.CalcIndices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">actin2.calcindices.CalcIndices</span></code></a>(spectrum, …)</p></td>
+<td><p>Calculates activity indices.</p></td>
+</tr>
+</tbody>
+</table>
+<span class="target" id="module-actin2.actin2"></span><dl class="py class">
+<dt id="actin2.actin2.ACTIN">
+<em class="property">class </em><code class="sig-prename descclassname">actin2.actin2.</code><code class="sig-name descname">ACTIN</code><a class="headerlink" href="#actin2.actin2.ACTIN" title="Permalink to this definition">¶</a></dt>
 <dd><p>The ACTIN class. Reads fits files and calculates activity indices.</p>
+<p>Any index is calculated as</p>
+<div class="math notranslate nohighlight">
+\[I = \frac{\sum C_i F_i}{\sum K_j R_j}\]</div>
+<p>where <span class="math notranslate nohighlight">\(F_i\)</span> and <span class="math notranslate nohighlight">\(R_j\)</span> are the flux inside the activity sensitive lines and reference bands, respectively. <span class="math notranslate nohighlight">\(C_i\)</span> and <span class="math notranslate nohighlight">\(K_j\)</span> are constants to be multiplyed to the <span class="math notranslate nohighlight">\(F_i\)</span> and <span class="math notranslate nohighlight">\(R_j\)</span> fluxes.</p>
+<p><em>Class attributes:</em></p>
 <dl class="py attribute">
-<dt id="actin2.ACTIN.ReadSpec">
-<code class="sig-name descname">ReadSpec</code><a class="headerlink" href="#actin2.ACTIN.ReadSpec" title="Permalink to this definition">¶</a></dt>
+<dt id="actin2.actin2.ACTIN.ReadSpec">
+<code class="sig-name descname">ReadSpec</code><a class="headerlink" href="#actin2.actin2.ACTIN.ReadSpec" title="Permalink to this definition">¶</a></dt>
 <dd><p>Object that reads spectrum and
-headers.</p>
+headers. See <a class="reference internal" href="#actin2.readspec.ReadSpec" title="actin2.readspec.ReadSpec"><code class="xref py py-class docutils literal notranslate"><span class="pre">actin2.readspec.ReadSpec</span></code></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#actin2.ReadSpec" title="actin2.ReadSpec">actin2.ReadSpec</a></p>
+<dd class="field-odd"><p>actin2.ReadSpec</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="actin2.ACTIN.IndTable">
-<code class="sig-name descname">IndTable</code><a class="headerlink" href="#actin2.ACTIN.IndTable" title="Permalink to this definition">¶</a></dt>
+<dt id="actin2.actin2.ACTIN.IndTable">
+<code class="sig-name descname">IndTable</code><a class="headerlink" href="#actin2.actin2.ACTIN.IndTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>Object containing the
-indices table.</p>
+indices parameters table. See <a class="reference internal" href="#actin2.indtable.IndTable" title="actin2.indtable.IndTable"><code class="xref py py-class docutils literal notranslate"><span class="pre">actin2.indtable.IndTable</span></code></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#actin2.IndTable" title="actin2.IndTable">actin2.IndTable</a></p>
+<dd class="field-odd"><p>actin2.IndTable</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="actin2.ACTIN.ProcessSpec">
-<code class="sig-name descname">ProcessSpec</code><a class="headerlink" href="#actin2.ACTIN.ProcessSpec" title="Permalink to this definition">¶</a></dt>
-<dd><p>Object to process the
-spectrum.</p>
+<dt id="actin2.actin2.ACTIN.CalcIndices">
+<code class="sig-name descname">CalcIndices</code><a class="headerlink" href="#actin2.actin2.ACTIN.CalcIndices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Object that calculates the
+indices. See <a class="reference internal" href="#actin2.calcindices.CalcIndices" title="actin2.calcindices.CalcIndices"><code class="xref py py-class docutils literal notranslate"><span class="pre">actin2.calcindices.CalcIndices</span></code></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#actin2.ProcessSpec" title="actin2.ProcessSpec">actin2.ProcessSpec</a></p>
+<dd class="field-odd"><p>actin2.CalcIndices</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="actin2.ACTIN.run">
-<code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">files</span></em>, <em class="sig-param"><span class="n">indices</span></em>, <em class="sig-param"><span class="n">rv_in</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">obj_in</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">save_data</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">progress</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">verb</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">table_df</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">spec_kw</span></em><span class="sig-paren">)</span><a class="headerlink" href="#actin2.ACTIN.run" title="Permalink to this definition">¶</a></dt>
-<dd><p>Run ACTIN for a list of files.</p>
+<dt id="actin2.actin2.ACTIN.plot_index_line">
+<code class="sig-name descname">plot_index_line</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em>, <em class="sig-param"><span class="n">line_id</span></em>, <em class="sig-param"><span class="n">table_df</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">wkey</span><span class="o">=</span><span class="default_value">'wave'</span></em>, <em class="sig-param"><span class="n">fkey</span><span class="o">=</span><span class="default_value">'flux'</span></em>, <em class="sig-param"><span class="n">show</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">ntol</span><span class="o">=</span><span class="default_value">4</span></em>, <em class="sig-param"><span class="n">show_bandpass</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">spec_kw</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">plt_kw</span></em><span class="sig-paren">)</span><a class="headerlink" href="#actin2.actin2.ACTIN.plot_index_line" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot sepctral line ‘line_id’.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="actin2.actin2.ACTIN.plot_index_lines">
+<code class="sig-name descname">plot_index_lines</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em>, <em class="sig-param"><span class="n">index</span></em>, <em class="sig-param"><span class="n">table_df</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">wkey</span><span class="o">=</span><span class="default_value">'wave'</span></em>, <em class="sig-param"><span class="n">fkey</span><span class="o">=</span><span class="default_value">'flux'</span></em>, <em class="sig-param"><span class="n">ntol</span><span class="o">=</span><span class="default_value">2</span></em>, <em class="sig-param"><span class="n">show</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">spec_kw</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">plt_kw</span></em><span class="sig-paren">)</span><a class="headerlink" href="#actin2.actin2.ACTIN.plot_index_lines" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot sepctral lines and bandpasses used to calculate index ‘index’.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="actin2.actin2.ACTIN.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">files</span></em>, <em class="sig-param"><span class="n">indices</span></em>, <em class="sig-param"><span class="n">obj_in</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">save_data</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">progress</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">verb</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">table_df</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">spec_kw</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="n">calcind_kw</span><span class="o">=</span><span class="default_value">{}</span></em><span class="sig-paren">)</span><a class="headerlink" href="#actin2.actin2.ACTIN.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run ACTIN for a list of fits files and indices.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>files</strong> (<em>list</em>) – List of fits files paths to be read.</p></li>
-<li><p><strong>indices</strong> (<em>list</em>) – List of indices identification (as in
+<li><p><strong>files</strong> (<em>list</em><em>, </em><em>str</em>) – List of fits files paths, or string with one fits file path to be read.</p></li>
+<li><p><strong>indices</strong> (<em>list</em><em>, </em><em>str</em>) – List of indices identification (as in
 the indices table) to be calculated. If empty returns the fits headers only.</p></li>
 <li><p><strong>rv_in</strong> (<em>float</em><em>, </em><em>None</em>) – If float, use this RV value to
 shift spectrum to stellar rest frame, if None use RV value from fits file.</p></li>
+<li><p><strong>spec_class_in</strong> (<em>None</em><em>, </em><em>str</em>) – Name of the spectrograph to be read. Usefull if new spectrographs are added to the ACTIN spectrograph directory.</p></li>
 <li><p><strong>obj_in</strong> (<em>str</em><em>, </em><em>None</em>) – If not None, the target name from
 the fits file is overriden by this input.</p></li>
+<li><p><strong>save_data</strong> (<em>str</em><em>, </em><em>None</em>) – path with file_name to save output in csv format.</p></li>
 <li><p><strong>progress</strong> (<em>bool</em>) – If True show progress bar.</p></li>
-<li><p><strong>table_df</strong> (<em>None</em><em>, </em><em>pd.DataFrame</em>) – Table with the indices parameters. If None use the built-in table.</p></li>
+<li><p><strong>table_df</strong> (<em>None</em><em>, </em><em>pd.DataFrame</em>) – Table DataFrame with the indices parameters.
+If None use the default table.</p></li>
 <li><p><strong>verb</strong> (<em>bool</em>) – Activate verbose option.</p></li>
 </ul>
 </dd>
@@ -223,31 +300,24 @@ the fits file is overriden by this input.</p></li>
 
 </dd></dl>
 
-<dl class="py class">
-<dt id="actin2.IndTable">
-<em class="property">class </em><code class="sig-prename descclassname">actin2.</code><code class="sig-name descname">IndTable</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">table_csv</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">verb</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#actin2.IndTable" title="Permalink to this definition">¶</a></dt>
-<dd><p>Class to manipulate the indices table.</p>
-<blockquote>
-<div><dl class="simple">
-<dt>table_csv<span class="classifier">str</span></dt><dd><p>Path to the csv table with indices data. If ‘None’ use built-in table.</p>
+<span class="target" id="module-actin2.readspec"></span><dl class="py class">
+<dt id="actin2.readspec.ReadSpec">
+<em class="property">class </em><code class="sig-prename descclassname">actin2.readspec.</code><code class="sig-name descname">ReadSpec</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em>, <em class="sig-param"><span class="n">verb</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">spec_class_in</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">spec_file_in</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">spec_kw</span></em><span class="sig-paren">)</span><a class="headerlink" href="#actin2.readspec.ReadSpec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extracts data from spectrograph fits files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file</strong> (<em>str</em>) – Fits file path containing the spectral data.</p></li>
+<li><p><strong>spec_class_in</strong> (<em>str</em><em>, </em><em>None</em>) – Spectrograph class identification. Usefull if new spectrographs are added.</p></li>
+<li><p><strong>verb</strong> (<em>bool</em>) – Turn verbose on/off.</p></li>
+<li><p><strong>**spec_kw</strong> (<em>dict</em>) – Additional keyword arguments to be passed to thhe spectrograph class.</p></li>
+</ul>
 </dd>
 </dl>
-</div></blockquote>
-</dd></dl>
-
-<dl class="py class">
-<dt id="actin2.ProcessSpec">
-<em class="property">class </em><code class="sig-prename descclassname">actin2.</code><code class="sig-name descname">ProcessSpec</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">spec</span></em>, <em class="sig-param"><span class="n">verb</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#actin2.ProcessSpec" title="Permalink to this definition">¶</a></dt>
-<dd><p>Process the spectrum</p>
-</dd></dl>
-
-<dl class="py class">
-<dt id="actin2.ReadSpec">
-<em class="property">class </em><code class="sig-prename descclassname">actin2.</code><code class="sig-name descname">ReadSpec</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em>, <em class="sig-param"><span class="n">obj_in</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">rv_in</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">verb</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">spec_kw</span></em><span class="sig-paren">)</span><a class="headerlink" href="#actin2.ReadSpec" title="Permalink to this definition">¶</a></dt>
-<dd><p>Extracts data from spectrograph fits files.</p>
+<p><em>Class attributes:</em></p>
 <dl class="py attribute">
-<dt id="actin2.ReadSpec.spectrum">
-<code class="sig-name descname">spectrum</code><a class="headerlink" href="#actin2.ReadSpec.spectrum" title="Permalink to this definition">¶</a></dt>
+<dt id="actin2.readspec.ReadSpec.spectrum">
+<code class="sig-name descname">spectrum</code><a class="headerlink" href="#actin2.readspec.ReadSpec.spectrum" title="Permalink to this definition">¶</a></dt>
 <dd><p>Dictionary containing wavelength and flux</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -257,8 +327,8 @@ the fits file is overriden by this input.</p></li>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="actin2.ReadSpec.header">
-<code class="sig-name descname">header</code><a class="headerlink" href="#actin2.ReadSpec.header" title="Permalink to this definition">¶</a></dt>
+<dt id="actin2.readspec.ReadSpec.header">
+<code class="sig-name descname">header</code><a class="headerlink" href="#actin2.readspec.ReadSpec.header" title="Permalink to this definition">¶</a></dt>
 <dd><p>Dictionary containing selected headers from
 the fits file</p>
 <dl class="field-list simple">
@@ -268,15 +338,20 @@ the fits file</p>
 </dl>
 </dd></dl>
 
-<p>New features:</p>
-<ul class="simple">
-<li><p>RON added to flux noise</p></li>
-<li><p>(BERV correction with barycorr)</p></li>
-<li><p>Extracts CCF profile (and Bisector)</p></li>
-</ul>
+<dl class="py attribute">
+<dt id="actin2.readspec.ReadSpec.spec">
+<code class="sig-name descname">spec</code><a class="headerlink" href="#actin2.readspec.ReadSpec.spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>The spectrograph class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>object</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
-<dt id="actin2.ReadSpec.plot">
-<code class="sig-name descname">plot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key_wave</span><span class="o">=</span><span class="default_value">'wave'</span></em>, <em class="sig-param"><span class="n">key_flux</span><span class="o">=</span><span class="default_value">'flux'</span></em>, <em class="sig-param"><span class="n">order</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ax</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">show</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">plt_kw</span></em><span class="sig-paren">)</span><a class="headerlink" href="#actin2.ReadSpec.plot" title="Permalink to this definition">¶</a></dt>
+<dt id="actin2.readspec.ReadSpec.plot_spec">
+<code class="sig-name descname">plot_spec</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key_wave</span><span class="o">=</span><span class="default_value">'wave'</span></em>, <em class="sig-param"><span class="n">key_flux</span><span class="o">=</span><span class="default_value">'flux'</span></em>, <em class="sig-param"><span class="n">order</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ax</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">show</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">plt_kw</span></em><span class="sig-paren">)</span><a class="headerlink" href="#actin2.readspec.ReadSpec.plot_spec" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot spectrum.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -286,6 +361,138 @@ in <code class="docutils literal notranslate"><span class="pre">spectrum</span><
 <li><p><strong>key_flux</strong> (<em>str</em><em>, </em><em>option</em>) – Keyword for the flux array stored
 in <code class="docutils literal notranslate"><span class="pre">spectrum</span></code> dictionary.</p></li>
 </ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-actin2.indtable"></span><dl class="py class">
+<dt id="actin2.indtable.IndTable">
+<em class="property">class </em><code class="sig-prename descclassname">actin2.indtable.</code><code class="sig-name descname">IndTable</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">table_csv</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">verb</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#actin2.indtable.IndTable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to manipulate the indices table.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>table_csv</strong> (<em>str</em><em>, </em><em>None</em>) – Path to the csv table with indices data. If <code class="docutils literal notranslate"><span class="pre">None</span></code> use built-in table (default).</p>
+</dd>
+</dl>
+<p><em>Class attributes:</em></p>
+<dl class="py attribute">
+<dt id="actin2.indtable.IndTable.table">
+<code class="sig-name descname">table</code><a class="headerlink" href="#actin2.indtable.IndTable.table" title="Permalink to this definition">¶</a></dt>
+<dd><p>Table with indices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="actin2.indtable.IndTable.indices">
+<code class="sig-name descname">indices</code><a class="headerlink" href="#actin2.indtable.IndTable.indices" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of available indices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="actin2.indtable.IndTable.params">
+<code class="sig-name descname">params</code><a class="headerlink" href="#actin2.indtable.IndTable.params" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of required index line parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="actin2.indtable.IndTable.add_line">
+<code class="sig-name descname">add_line</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ind_id</span></em>, <em class="sig-param"><span class="n">ind_var</span></em>, <em class="sig-param"><span class="n">ln_id</span></em>, <em class="sig-param"><span class="n">ln_c</span></em>, <em class="sig-param"><span class="n">ln_ctr</span></em>, <em class="sig-param"><span class="n">ln_win</span></em>, <em class="sig-param"><span class="n">bandtype</span></em><span class="sig-paren">)</span><a class="headerlink" href="#actin2.indtable.IndTable.add_line" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a line to the indices table.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ind_id</strong> (<em>str</em>) – Index identification for the line.</p></li>
+<li><p><strong>ind_var</strong> (<em>str</em>) – A string identifying the line as activity line (if <code class="docutils literal notranslate"><span class="pre">L1</span></code>, <code class="docutils literal notranslate"><span class="pre">L2</span></code>, …) or reference band (if <code class="docutils literal notranslate"><span class="pre">R1</span></code>, <code class="docutils literal notranslate"><span class="pre">R2</span></code>, …).</p></li>
+<li><p><strong>ln_id</strong> (<em>str</em>) – Line identification</p></li>
+<li><p><strong>ln_c</strong> (<em>float</em>) – Constant value to be multiplied to the line.</p></li>
+<li><p><strong>ln_ctr</strong> (<em>float</em>) – Line centre [angstrom]</p></li>
+<li><p><strong>ln_win</strong> (<em>float</em>) – Line bandwidth [angstrom]</p></li>
+<li><p><strong>bandtype</strong> (<em>str</em>) – Bandpass type. If <code class="docutils literal notranslate"><span class="pre">sq</span></code> is square filter, if <code class="docutils literal notranslate"><span class="pre">tri</span></code> is triangular filter where <code class="docutils literal notranslate"><span class="pre">ln_win</span></code> will be the triangle FWHM.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-actin2.calcindices"></span><dl class="py class">
+<dt id="actin2.calcindices.CalcIndices">
+<em class="property">class </em><code class="sig-prename descclassname">actin2.calcindices.</code><code class="sig-name descname">CalcIndices</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">spectrum</span></em>, <em class="sig-param"><span class="n">headers</span></em>, <em class="sig-param"><span class="n">indices</span></em>, <em class="sig-param"><span class="n">step</span><span class="o">=</span><span class="default_value">0.001</span></em>, <em class="sig-param"><span class="n">table_df</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">plot_lines</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">full_output</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">interp</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">verb</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#actin2.calcindices.CalcIndices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates activity indices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>spectrum</strong> (<em>dict</em>) – Dictionary containing wavelength <code class="docutils literal notranslate"><span class="pre">wave</span></code> and flux <code class="docutils literal notranslate"><span class="pre">flux</span></code> data.</p></li>
+<li><p><strong>headers</strong> (<em>dict</em>) – Dictionary containing useful fits headers information.</p></li>
+<li><p><strong>indices</strong> (<em>list</em><em>, </em><em>str</em>) – List of indices <code class="docutils literal notranslate"><span class="pre">ìnd_id</span></code> to be extracted.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt id="actin2.calcindices.CalcIndices.indices">
+<code class="sig-name descname">indices</code><a class="headerlink" href="#actin2.calcindices.CalcIndices.indices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dictionary with indices data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="actin2.calcindices.CalcIndices._calc_Rneg_ln">
+<code class="sig-name descname">_calc_Rneg_ln</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">flux</span></em><span class="sig-paren">)</span><a class="headerlink" href="#actin2.calcindices.CalcIndices._calc_Rneg_ln" title="Permalink to this definition">¶</a></dt>
+<dd><p>Negative flux ratio.</p>
+<div class="math notranslate nohighlight">
+\[R_\mathrm{neg} = \frac{\sum(F_\mathrm{neg})} {\sum(F_\mathrm{tot})}\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>flux</strong> (<em>array</em>) – Flux inside a bandpass.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Negative flux ratio for a given spectral line [0, 1]</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="actin2.calcindices.CalcIndices._spec_order">
+<code class="sig-name descname">_spec_order</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">wave_2d</span></em>, <em class="sig-param"><span class="n">flux_2d</span></em>, <em class="sig-param"><span class="n">flux_2d_err</span></em>, <em class="sig-param"><span class="n">ln_ctr</span></em>, <em class="sig-param"><span class="n">ln_win</span></em>, <em class="sig-param"><span class="n">bandtype</span></em>, <em class="sig-param"><span class="n">type</span><span class="o">=</span><span class="default_value">'dist'</span></em>, <em class="sig-param"><span class="n">show_orders</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">verb</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#actin2.calcindices.CalcIndices._spec_order" title="Permalink to this definition">¶</a></dt>
+<dd><p>Choose best spectral order for line and returns wave and flux at order.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="actin2.calcindices.CalcIndices.calc_flux_band">
+<code class="sig-name descname">calc_flux_band</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">wave</span></em>, <em class="sig-param"><span class="n">flux</span></em>, <em class="sig-param"><span class="n">flux_err</span></em>, <em class="sig-param"><span class="n">noise</span></em>, <em class="sig-param"><span class="n">ctr</span></em>, <em class="sig-param"><span class="n">win</span></em>, <em class="sig-param"><span class="n">bandtype</span></em>, <em class="sig-param"><span class="n">step</span></em>, <em class="sig-param"><span class="n">show_plot</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">interp</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">verb</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#actin2.calcindices.CalcIndices.calc_flux_band" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate average flux in bandpass.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">interp</span></code> is True interpolates between the limiting pixels and the bandpass limits to deal with the finite spectrograph resolution. Recomended for low-resolution spectrographs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Flux in bandpass.
+float: Flux in bandpass error.
+float: Negative flux ratio.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>float</p>
 </dd>
 </dl>
 </dd></dl>
@@ -303,7 +510,7 @@ in <code class="docutils literal notranslate"><span class="pre">spectrum</span><
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
       
-        <a href="quickstart.html" class="btn btn-neutral float-left" title="Getting started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="add_spec.html" class="btn btn-neutral float-left" title="Adding new spectrographs" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -313,7 +520,7 @@ in <code class="docutils literal notranslate"><span class="pre">spectrum</span><
   <div role="contentinfo">
     <p>
         
-        &copy; Copyright 2021, J. Gomes da Silva
+        &copy; Copyright 2018-2022, J. Gomes da Silva
 
     </p>
   </div>

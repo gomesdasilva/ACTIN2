@@ -1,0 +1,142 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Using ACTIN with any spectra\n",
+    "\n",
+    "In this tutorial we will learn how to use `ACTIN` for spectrographs other than the ones included or when we only have access to wavelength and flux vectors. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 97,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from actin2 import ACTIN\n",
+    "actin = ACTIN()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Let's use the test spectra that come with `ACTIN` as an example to extract only the wavelength and flux"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 98,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "'../../../actin2/test/HARPS/HD41248/HARPS.2014-01-24T01:18:06.472_s1d_A.fits'"
+      ]
+     },
+     "execution_count": 98,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "import glob, os\n",
+    "files = glob.glob(os.path.join(os.pardir, os.pardir, os.pardir, \"actin2/test/HARPS/HD41248\", \"*_s1d_A.fits\"))\n",
+    "files[0]"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Now we are going to read this file and retrieve the spectra (in this case already at the stellar rest frame)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 99,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "spec = actin.ReadSpec(files[0]).spec\n",
+    "wave = spec.spectrum['wave']\n",
+    "flux = spec.spectrum['flux']"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "To calculate indices from a spectrograph that is not included in `ACTIN`, create a `spectrum` dictionary with `wave` and `flux` keys and a `headers` dictionary with extra information like the time of observation, target name, etc. (could be empty)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 100,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "spectrum = dict(wave=wave, flux=flux)\n",
+    "headers = dict()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Now we call `actin.CalcIndices` using the dictionaries and a list of indices with IDs as in the indices table to calculate the indices (to check the table print `actin.IndTable().table`). The results will be stored in the `indices` dictionary. Below is an example of an output for the Ca II H&K (aka S-index), `I_CaII`."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 101,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "{'I_CaII': 0.1396179564558526,\n",
+       " 'I_CaII_err': 0.0010474713400138317,\n",
+       " 'I_CaII_Rneg': 0.00019413458539929707}"
+      ]
+     },
+     "execution_count": 101,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "indices = actin.CalcIndices(spectrum, headers, ['I_CaII']).indices\n",
+    "indices"
+   ]
+  }
+ ],
+ "metadata": {
+  "interpreter": {
+   "hash": "398dc28c06ad810e77de546bbdfa897a6ee0b83e59a5207339dda01a7843e01d"
+  },
+  "kernelspec": {
+   "display_name": "Python 3.7.3 ('base')",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.7.3"
+  },
+  "orig_nbformat": 4
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}

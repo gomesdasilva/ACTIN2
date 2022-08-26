@@ -8,49 +8,39 @@ class IndTable:
     """
     Class to manipulate the indices table.
 
-    Parameters:
-    -----------
-        table_csv : str
-            Path to the csv table with indices data. If 'None' use built-in table.
+    Args:
+        table_csv (str, None): Path to the csv table with indices data. If ``None`` use built-in table (default).
 
+    *Class attributes:*
 
-    E.g.:
-        HaLW = dict(
-            ind_id = 'I_HaWings',
-            ind_var = 'L1',
-            ln_id = 'HaLW',
-            ln_c = 1.0,
-            ln_ctr = halw_ctr,
-            ln_win = haw_win,
-            bandtype = 'sq'
-        )
-        new_tab = actin.IndTable()
-        new_tab.add_line(**HaLW)
+    Attributes:
+        table (pd.DataFrame): Table with indices.
+        indices (list): List of available indices.
+        params (list): List of required index line parameters.
     """
 
     def __init__(self, table_csv=None, verb=False):
-        if verb:
-            print("Running IndTable")
 
         if not table_csv:
             table_csv = os.path.join(os.path.dirname(__file__), "actin_table.csv")
 
         self.table = pd.read_csv(table_csv, index_col=False)
-        
-        self.indices = np.unique(self.table.ind_id)
+        self.indices = list(np.unique(self.table.ind_id))
         self.params = list(self.table.keys())
 
-    def show_table(self):
-        print(self.table)
-
-    def show_indices(self):
-        print(self.indices)
-
-    def show_params(self):
-        print(self.params)
 
     def add_line(self, ind_id, ind_var, ln_id, ln_c, ln_ctr, ln_win, bandtype):
-        # parameters should be str or float
+        """Add a line to the indices table.
+
+        Args:
+            ind_id (str): Index identification for the line.
+            ind_var (str): A string identifying the line as activity line (if ``L1``, ``L2``, ...) or reference band (if ``R1``, ``R2``, ...).
+            ln_id (str): Line identification
+            ln_c (float): Constant value to be multiplied to the line.
+            ln_ctr (float): Line centre [angstrom]
+            ln_win (float): Line bandwidth [angstrom]
+            bandtype (str): Bandpass type. If ``sq`` is square filter, if ``tri`` is triangular filter where ``ln_win`` will be the triangle FWHM.
+        """
         new_line = dict(
             ind_id = ind_id,
             ind_var = ind_var,

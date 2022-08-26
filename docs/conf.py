@@ -12,19 +12,28 @@
 #
 import os
 import sys
-# sys.path.insert(0, os.path.abspath('.'))
+import datetime
+#sys.path.insert(0, os.path.abspath('.'))
 
 sys.path.insert(0, os.path.abspath('../'))
 
 
 # -- Project information -----------------------------------------------------
+year = datetime.datetime.now().date().year
+version_file = os.path.join(os.path.dirname(__file__), os.pardir, "actin2", "VERSION")
+
+try:
+    with open(version_file, 'r') as file:
+        version = file.read()
+except FileNotFoundError:
+    version = "unknown"
 
 project = 'ACTIN'
-copyright = '2021, J. Gomes da Silva'
+copyright = f'2018-{year}, J. Gomes da Silva'
 author = 'J. Gomes da Silva'
 
 # The full version, including alpha/beta/rc tags
-release = '2.0'
+release = version
 
 
 # -- General configuration ---------------------------------------------------
@@ -32,13 +41,17 @@ release = '2.0'
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-import sphinx_rtd_theme
+#import sphinx_rtd_theme
+#import myst_parser
+#import nbsphinx
 
 extensions = [
-    "myst_parser",
+    #"myst_parser",
     "sphinx_rtd_theme",
     "sphinx.ext.autodoc",
-    'sphinx.ext.napoleon'
+    "sphinx.ext.autosummary",
+    'sphinx.ext.napoleon',
+    'nbsphinx',
 ]
 
 napoleon_google_docstring = True

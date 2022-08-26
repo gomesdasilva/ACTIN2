@@ -9,146 +9,92 @@ from .indtable import IndTable
 from .spectrographs._spec_tools import printif
 
 
-def spec_order(wave_2d, flux_2d, flux_2d_err, ln_ctr, ln_win, bandtype, type='dist', show_orders=False, verb=False):
-    """Choose best spectral order for line and returns wave and flux at order.
-
-    """
-    if bandtype == 'tri':
-        wmin = ln_ctr - ln_win
-        wmax = ln_ctr + ln_win
-    if bandtype == 'sq':
-        wmin = ln_ctr - ln_win/2
-        wmax = ln_ctr + ln_win/2
-
-    orders = []
-    min_dist = []
-    for i, wave in enumerate(wave_2d):
-        if wmin > wave[0] and wmax < wave[-1]:
-            orders.append(i)
-            dist = ((wmin - wave_2d[i][0], wave_2d[i][-1] - wmax))
-            min_dist.append(np.min(dist))
-
-
-    printif(f"available orders: {orders}", verb)
-
-    if show_orders:
-        plt.title("spec_order: orders available for selected line")
-        for order in orders:
-            plt.plot(wave_2d[order], flux_2d[order], ls='-', marker='', label=order)
-        plt.axvline(ln_ctr, c='k', ls='-')
-        plt.axvline(wmin, c='k', ls=':')
-        plt.axvline(wmax, c='k', ls=':')
-        plt.legend()
-        plt.show()
-
-    # Selects the order with the higher distance to the wave edges from the bandpass limits:
-    if type == 'dist':
-        order = orders[np.argmax(min_dist)]
-        printif(f"selected: {order}", verb)
-
-    return wave_2d[order], flux_2d[order], flux_2d_err[order]
-
-
-def check_negflux(flux, verb=True):
-    flux = np.asarray(flux)
-
-    # Total absolute flux in given spectral line:
-    tot_flux = np.sum(abs(flux))
-
-    # Number of pixels with negative flux
-    neg_pixs = flux[flux < 0].size
-
-    # Negative flux in given spectral line
-    neg_flux = np.sum(flux[flux < 0])
-
-    # Positive flux in given spectral line
-    pos_flux = np.sum(flux[flux > 0])
-
-    # Negative flux ratio for a given spectral line:
-    Rneg_ln = abs(neg_flux)/tot_flux
-
-    flg_negflux = "OK"
-
-    if neg_pixs > 0:
-        if verb:
-            print(f"Negative flux detected")
-        flg_negflux = "negFlux"
-
-    return Rneg_ln, neg_flux, tot_flux, flg_negflux
-
-
-
-
 class CalcIndices:
+    """Calculates activity indices.
 
-    def __init__(self, spec, indices, step=1e-6, table_df=None, plot_lines=False, full_output=False, interp=True, verb=False):
+    Args:
+        spectrum (dict): Dictionary containing wavelength ``wave`` and flux ``flux`` data.
+        headers (dict): Dictionary containing useful fits headers information.
+        indices (list, str): List of indices ``ìnd_id`` to be extracted.
 
-        data = spec.headers
+    Attributes:
+        indices (dict): Dictionary with indices data.
+    """
 
-        try:
-            flux = spec.spectrum['flux']
-        except KeyError:
-            printif("*** ERROR: There is no 'flux' keyword in the spectrum dictionary", verb)
-            for index in indices:
-                data[index] = np.nan
-                data[index + "_err"] = np.nan
-            self.data = data
-        else:
-            try:
-                wave = spec.spectrum['wave']
-            except KeyError:
-                printif("*** ERROR: There is no 'wave' keyword in the spectrum dictionary", verb)
-                for index in indices:
-                    data[index] = np.nan
-                    data[index + "_err"] = np.nan
-                self.data = data
+    def __init__(self, spectrum, headers, indices, step=1e-3, table_df=None, plot_lines=False, full_output=False, interp=True, verb=False):
 
-            else:
+        if "flux" not in spectrum:
+            raise KeyError(f"{__class__.__name__} ERROR: There is no 'flux' keyword in the 'spectrum' dictionary")
 
-                try:
-                    flux_err = spec.spectrum['flux_err']
-                except KeyError:
-                    flux_err = np.sqrt(abs(flux))
+        if "wave" not in spectrum:
+            raise KeyError(f"{__class__.__name__} ERROR: There is no 'wave' keyword in the 'spectrum' dictionary")
 
-                try:
-                    noise = spec.headers['noise']
-                except KeyError:
-                    noise = 0.0
-
-
-                for index in indices:
-                    printif(f" Computing {index}", verb=verb)
-                    index_dict = self.calc_index(wave, flux, flux_err, noise, index, step, table_df, plot_lines, full_output, interp, verb)
-
-                    data.update(index_dict)
-
-                self.data = data
-
-
-    def calc_index(self, wave, flux, flux_err, noise, index, step, table_df, plot_lines, full_output, interp, verb):
-
-        printif("Running CalcIndex", verb)
+        # If indices is given as a string enforce type as list:
+        if not isinstance(indices, (list, np.ndarray, tuple)):
+            indices = [indices]
 
         if table_df is None:
             ind_table = IndTable().table
         else:
+            if not isinstance(table_df, pd.DataFrame):
+                raise RuntimeError(f"{__class__.__name__} ERROR: 'table_df' is not a pandas DataFrame")
             ind_table = table_df
 
-        assert index in ind_table.ind_id.values, f"*** ERROR: {index} is not available in indices table"
+        # Confirm that index and required lines (at least one activity and reference line per index) are present in the table:
+        for index in indices:
+            if index not in np.unique(ind_table.ind_id.values):
+                raise RuntimeError(f"{__class__.__name__} ERROR: Index {index} not available in 'ind_table'. Available indices are: {np.unique(ind_table.ind_id.values)}")
+            if "R1" not in ind_table[ind_table.ind_id==index].ind_var.values:
+                raise RuntimeError(f"{__class__.__name__} ERROR: Index {index} does not have reference lines ('R1' under 'ind_var' column) in 'ind_table'. Available line variables for index are: {np.unique(ind_table[ind_table.ind_id==index].ind_var.values)}")
+            if "L1" not in ind_table[ind_table.ind_id==index].ind_var.values:
+                raise RuntimeError(f"{__class__.__name__} ERROR: Index {index} does not have activity lines ('L1' under 'ind_var' column) in 'ind_table'. Available line variables for index are: {np.unique(ind_table[ind_table.ind_id==index].ind_var.values)}")
+                
+
+        flux = spectrum['flux']
+        wave = spectrum['wave']
+
+
+        if "flux_err" in spectrum:
+            flux_err = spectrum['flux_err'] # flux noise from spectrograph module, depends on spectrograph
+        else:
+            flux_err = np.sqrt(abs(flux)) # photon noise
+
+
+        # Usefull if a 'noise' key with additional noise comes from the spectrograph 'header' dictionary with additional noise value to be added in quadrature to the index errors:
+        if 'noise' in headers:
+            noise = headers['noise']
+        else:
+            noise = 0.0
+
+
+        data = dict()
+
+        for index in indices:
+            index_dict = self.calc_index(wave, flux, flux_err, noise, index, step, ind_table, plot_lines, full_output, interp, verb)
+
+            data.update(index_dict)
+
+        self.indices = data
+
+
+
+    def calc_index(self, wave, flux, flux_err, noise, index, step, ind_table, plot_lines, full_output, interp, verb):
 
         # get index from ind_table:
         df = ind_table[ind_table.ind_id == index]
         ln_ids = df.ln_id.values
 
 
-        F_num = []
-        F_num_err = []
-        F_denum = []
-        F_denum_err = []
-        wRneg_lines = []
-        lines = {}
-        win_list = []
-        for line in ln_ids:
+        F_num = np.zeros(len(ln_ids))
+        F_num_err = np.zeros(len(ln_ids))
+        F_denum = np.zeros(len(ln_ids))
+        F_denum_err = np.zeros(len(ln_ids))
+        Rneg_lines = np.zeros(len(ln_ids))
+        win_list = np.zeros(len(ln_ids))
+
+        lines = dict()
+
+        for i, line in enumerate(ln_ids):
             mask = (df.ln_id == line)
 
             ctr = df.ln_ctr[mask].values[0]
@@ -159,55 +105,48 @@ class CalcIndices:
 
 
             if len(wave.shape) == 2:
-                w, f, f_err = spec_order(wave, flux, flux_err, ctr, win, bandtype)
+                w, f, f_err = self._spec_order(wave, flux, flux_err, ctr, win, bandtype, verb=verb)
             if len(wave.shape) == 1:
-                w = wave; f = flux; f_err= flux_err
+                w = self._check_wave_range(wave, index, ind_table, verb=verb)
+                f = flux; f_err= flux_err
 
-            
-            F, F_err, wRneg_ln = self.interp_flux_band(w, f, f_err, noise, ctr, win, bandtype, step, plot_lines, interp)
 
-            lines["I_" + line + '_F'] = F
-            lines["I_" + line + '_F_err'] = F_err
-            lines["I_" + line + '_wRneg'] = wRneg_ln
+            if w is None or f is None: # the exception was taken care off above
+                return dict()
+
+
+            flux_band, flux_band_err, Rneg_ln = self.calc_flux_band(w, f, f_err, noise, ctr, win, bandtype, step, plot_lines, interp, verb=verb)
+
+            if full_output:
+                lines[line + '_F'] = flux_band
+                lines[line + '_F_err'] = flux_band_err
+                lines[line + '_Rneg'] = Rneg_ln
                 
 
-            wRneg_lines.append(wRneg_ln)
+            Rneg_lines[i] = Rneg_ln
 
             if ind_var.startswith("L"):
-                F_num.append(const * F)
-                F_num_err.append(F_err)
+                F_num[i] = const * flux_band
+                F_num_err[i] = flux_band_err
 
             elif ind_var.startswith("R"):
-                F_denum.append(const * F)
-                F_denum_err.append(F_err)
+                F_denum[i] = const * flux_band
+                F_denum_err[i] = flux_band_err
 
-            win_list.append(win)
+            win_list[i] = win
 
-
-        F_num = np.asarray(F_num)
-        F_denum = np.asarray(F_denum)
-        F_num_err = np.asarray(F_num_err)
-        F_denum_err = np.asarray(F_denum_err)
-
-        if not F_denum.all():
-            F_denum = 1.
 
         val = np.sum(F_num)/np.sum(F_denum)
 
         val_err = np.sqrt(np.sum(F_num_err**2) + val**2 * np.sum(F_denum_err**2)) / (np.sum(F_denum))
 
-        # weighted ratio of negative flux to total flux
-        # if this value is 1 it means all flux in all the lines is negative
-        # if this value is 0.01, then 1% of the flux in used to compute the index is negative
-        # TODO: test for which values of wRneg the index deviates by more than 1-sigma
-        wRneg = np.mean(wRneg_lines)#/np.sum(win_list)
-
+        # Ratio of negative flux to total flux:
+        Rneg = np.mean(Rneg_lines)
 
         data = {}
         data[index] = val
         data[index + '_err'] = val_err
-        data[index + '_wRneg'] = wRneg
-        
+        data[index + '_Rneg'] = Rneg
 
         if full_output:
             data.update(lines)
@@ -215,23 +154,24 @@ class CalcIndices:
         return data
 
 
-    
-    def interp_flux_band(self, wave, flux, flux_err, noise, ctr, win, bandtype, step, show_plot=False, interp=True):
+
+    def calc_flux_band(self, wave, flux, flux_err, noise, ctr, win, bandtype, step, show_plot=False, interp=True, verb=False):
         """Calculate average flux in bandpass.
         
-        Interpolates between the limiting pixels and the bandpass limits to deal with the finite spectrograph resolution.
+        If ``interp`` is True interpolates between the limiting pixels and the bandpass limits to deal with the finite spectrograph resolution. Recomended for low-resolution spectrographs.
         
         Returns:
-            Flux in bandpass
-            Flux in bandpass error
-            Weighted negative flux ratio """
+            float: Flux in bandpass.
+            float: Flux in bandpass error.
+            float: Negative flux ratio.
+        """
 
         if bandtype == "tri":
             wmin = ctr - win; wmax = ctr + win
         if bandtype == "sq":
             wmin = ctr - win/2; wmax = ctr + win/2
 
-        def interp_band_lims(array, wave, wmin, wmax, step):
+        def _interp_band_lims(array, wave, wmin, wmax, step):
             """Interpolate the flux between the limiting pixels and the bandpass limits wmin and wmax to reduce the effect of the finite spectrograph resolution.
 
             Args:
@@ -282,15 +222,16 @@ class CalcIndices:
 
 
         if interp:
-            wave_i, flux_i = interp_band_lims(flux, wave, wmin, wmax, step)
-            _, flux_err_i = interp_band_lims(flux_err, wave, wmin, wmax, step)
+            wave_i, flux_i = _interp_band_lims(flux, wave, wmin, wmax, step)
+            _, flux_err_i = _interp_band_lims(flux_err, wave, wmin, wmax, step)
         else:
             mask = (wave >= wmin) & (wave <= wmax)
             flux_i = flux[mask]
             flux_err_i = flux_err[mask]
             wave_i = wave[mask]
 
-        Rneg_ln, _, _, _ = check_negflux(flux_i, verb=False)
+        Rneg_ln = self._calc_Rneg_ln(flux_i)
+
         
         if bandtype == 'tri':
             bp_i = 1 - np.abs(wave_i - ctr)/win
@@ -299,23 +240,109 @@ class CalcIndices:
             bp_mask = (wave_i >= ctr - win/2) & (wave_i <= ctr + win/2)
             bp_i = np.where(bp_mask, 1, 0.0)
 
-        if show_plot:
-            plt.plot(wave, flux, 'k-', lw=0.7, alpha=0.5)
-            plt.plot(wave_i, flux_i, 'k-', lw=1)
-            plt.plot(wave_i, flux_i.max()*bp_i, 'b--', lw=0.7, label='bandpass')
-            plt.axvline(wmin, c='k', ls=':', lw=0.7, label='win')
-            plt.axvline(wmax, c='k', ls=':', lw=0.7)
-            plt.xlabel(r"$\lambda$ [$\AA$]")
-            plt.ylabel("Norm. Flux")
-            plt.legend(loc=1)
-            plt.ylim(-1.5*abs(min(flux_i)), 2*max(flux_i))
-            plt.xlim(wmin-win/2, wmax+win/2)
-            plt.show()
-
         flux_band = sum(flux_i * bp_i)/win
         flux_band_var= sum((flux_err_i**2 + noise**2) * bp_i**2)/win**2
 
-        return flux_band, np.sqrt(flux_band_var), Rneg_ln/win
+        if show_plot:
+            if bandtype == 'tri':
+                bp = 1 - np.abs(wave - ctr)/win
+                bp = np.where(bp > 0, bp, bp*0.0)
+            elif bandtype == 'sq':
+                bp_mask = (wave >= ctr - win/2) & (wave <= ctr + win/2)
+                bp = np.where(bp_mask, 1, 0.0)
+
+            plt.plot(wave, flux, 'k-', lw=0.7, alpha=0.5)
+            plt.plot(wave_i, flux_i, 'k-', lw=1)
+            plt.plot(wave, 1.2*flux_i.max()*bp, 'b--', lw=0.7, label='bandpass')
+
+            plt.xlabel(r"$\lambda$ [$\mathrm{\AA{}}$]")
+            plt.ylabel("Norm. Flux")
+            plt.legend(loc=1)
+            plt.ylim(-0.5*abs(min(flux_i)), 1.5*max(flux_i))
+            plt.xlim(wmin-win/2, wmax+win/2)
+            plt.show()
+
+        return flux_band, np.sqrt(flux_band_var), Rneg_ln
 
 
+    def _check_wave_range(self, wave, index, table_df, verb=False):
 
+        ln_ids = table_df[table_df.ind_id==index].ln_id.values
+
+        for line in ln_ids:
+            ctr = table_df[table_df.ln_id==line].ln_ctr.values[0]
+            win = table_df[table_df.ln_id==line].ln_win.values[0]
+            bt = table_df[table_df.ln_id==line].bandtype.values[0]
+
+            if bt == 'sq':
+                win = win/2
+
+            if wave[0] >= ctr - win or wave[-1] <= ctr + win:
+                printif(f"{sys._getframe().f_code.co_name} ERROR: bandpass outside wavelength range", verb=verb)
+                return None
+            else:
+                return wave
+
+
+    def _spec_order(self, wave_2d, flux_2d, flux_2d_err, ln_ctr, ln_win, bandtype, type='dist', show_orders=False, verb=False):
+        """Choose best spectral order for line and returns wave and flux at order."""
+
+        if flux_2d_err is None:
+            flux_2d_err = np.zeros_like(flux_2d)
+
+        if bandtype == 'tri':
+            wmin = ln_ctr - ln_win
+            wmax = ln_ctr + ln_win
+        if bandtype == 'sq':
+            wmin = ln_ctr - ln_win/2
+            wmax = ln_ctr + ln_win/2
+
+        orders = []
+        min_dist = []
+        for i, wave in enumerate(wave_2d):
+            if wmin > wave[0] and wmax < wave[-1]:
+                orders.append(i)
+                dist = ((wmin - wave_2d[i][0], wave_2d[i][-1] - wmax))
+                min_dist.append(np.min(dist))
+
+
+        if not orders:
+            printif(f"{sys._getframe().f_code.co_name} ERROR: bandpass outside wavelength range", verb=verb)
+            return None, None, None
+
+        #printif(f"available orders: {orders}", verb)
+
+        if show_orders:
+            plt.title("spec_order: orders available for selected line")
+            for order in orders:
+                plt.plot(wave_2d[order], flux_2d[order], ls='-', marker='', label=order)
+            plt.axvline(ln_ctr, c='k', ls='-')
+            plt.axvline(wmin, c='k', ls=':')
+            plt.axvline(wmax, c='k', ls=':')
+            plt.legend()
+            plt.show()
+
+        # Selects the order with the higher distance to the wave edges from the bandpass limits:
+        if type == 'dist':
+            order = orders[np.argmax(min_dist)]
+            #printif(f"selected: {order}", verb)
+
+        return wave_2d[order], flux_2d[order], flux_2d_err[order]
+
+
+    def _calc_Rneg_ln(self, flux):
+        r"""Negative flux ratio.
+
+        .. Math::
+
+            R_\mathrm{neg} = \frac{\sum(F_\mathrm{neg})} {\sum(F_\mathrm{tot})}
+
+
+        Args:
+            flux (array): Flux inside a bandpass.
+
+        Returns:
+            float: Negative flux ratio for a given spectral line [0, 1]
+        """
+        flux = np.asarray(flux)
+        return abs(np.sum(flux[flux < 0]))/np.sum(abs(flux))
