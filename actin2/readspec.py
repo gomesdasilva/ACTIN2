@@ -92,10 +92,14 @@ class ReadSpec:
         """Plot spectrum.
 
         Args:
-            key_wave (str, option) : Keyword for the wavelength array stored 
+            key_wave (str, option): Keyword for the wavelength array stored 
                 in ``spectrum`` dictionary.
-            key_flux (str, option) : Keyword for the flux array stored 
+            key_flux (str, option): Keyword for the flux array stored 
                 in ``spectrum`` dictionary.
+            order (int, None): Spectral order to plot if using 2D spectrum.
+            ax (matplotlib.axes, None): Axes for the plot. If ``None`` creates ``plt`` axes.
+            show (bool): If ``True`` show the plot.
+            **plt_kw: Additional keyword arguments to be passed to ``plt.plot()``.
         """
         spec = self.spec.spectrum
 
