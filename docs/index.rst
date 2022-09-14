@@ -35,7 +35,7 @@ With a simple one line python code, it is possible to run ACTIN on a list of fit
    
    df = actin.run(files, indices=['I_CaII', 'I_NaI'])
 
-where ``files`` is the list of fits file paths to be read, ``ìndices`` is the list of index identification names (as in the indices table), and ``df`` is the pandas DataFrame with the output time series including the selected headers such as radial-velocity, Julian date, and activity data. See the tutorials for more information.
+where ``files`` is the list of fits spectra file paths to be read, ``ìndices`` is the list of index identification names (as in the indices table), and ``df`` is the pandas DataFrame with the output time series including the selected headers such as radial-velocity, Julian date, and activity data. See the tutorials for more information.
 
 ACTIN is being developed in a `public repository on GitHub`_, if you have any trouble, please open an issue there.
 

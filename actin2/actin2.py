@@ -122,8 +122,9 @@ class ACTIN:
 
 
         if save_data:
-            if not os.path.isdir(os.path.dirname(save_data)):
-                os.makedirs(os.path.dirname(save_data))
+            if os.path.dirname(save_data):
+                if not os.path.isdir(os.path.dirname(save_data)):
+                    os.makedirs(os.path.dirname(save_data))
             df.to_csv(save_data, index=False)
 
         return df
