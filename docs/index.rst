@@ -3,7 +3,7 @@ ACTIN 2: Activity Indices Toolkit
 
 ACTIN is a python tool that calculates user defined spectroscopic activity indices for different spectrographs.
 
-The method used is based on the original s-index (see `Duncan et al. 1991 <https://ui.adsabs.harvard.edu/abs/1991ApJS...76..383D/abstract>`_), where the flux in the cores of the activity sensitive lines is divided by reference pseudo-continuum regions.
+The method used is based on the original S-index (see `Duncan et al. 1991 <https://ui.adsabs.harvard.edu/abs/1991ApJS...76..383D/abstract>`_), where the flux in the cores of the activity sensitive lines is divided by reference pseudo-continuum regions.
 The flux determination, index calculation and errors are described in the Appendix A of `Gomes da Silva et al. (2021) <https://ui.adsabs.harvard.edu/abs/2021A%26A...646A..77G/abstract>`_.
 The errors are the photon noise, however there is an option to include extra noise, which is added in quadrature to the overall errors.
 
@@ -14,7 +14,7 @@ Included are some of the most used activity proxies in the optical:
 - NaI D2
 - HeI
 
-A description of these indices is provided in `Gomes da Silva et al. (2011) <https://ui.adsabs.harvard.edu/abs/2011A%26A...534A..30G/abstract>`_.
+A description of these indices is provided in `Gomes da Silva et al. (2011) <https://ui.adsabs.harvard.edu/abs/2011A%26A...534A..30G/abstract>`_ and `Gomes da Silva et al. (2022) <https://ui.adsabs.harvard.edu/abs/2022arXiv221006903G/abstract>`_ for :math:`\mbox{H}\alpha` using 0.6 bandwidth.
 Other indices can be added easily by editing the indices table (see `The indices table <https://actin2.readthedocs.io/en/latest/add_index.html>`_).
 
 Implemented spectrographs:
