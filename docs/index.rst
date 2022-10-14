@@ -14,7 +14,7 @@ Included are some of the most used activity proxies in the optical:
 - NaI D2
 - HeI
 
-A description of these indices is provided in `Gomes da Silva et al. (2011) <https://ui.adsabs.harvard.edu/abs/2011A%26A...534A..30G/abstract>`_ and `Gomes da Silva et al. (2022) <https://ui.adsabs.harvard.edu/abs/2022arXiv221006903G/abstract>`_ for :math:`\mbox{H}\alpha` using 0.6 bandwidth.
+A description of these indices is provided in `Gomes da Silva et al. (2011) <https://ui.adsabs.harvard.edu/abs/2011A%26A...534A..30G/abstract>`_, and `Gomes da Silva et al. (2022) <https://ui.adsabs.harvard.edu/abs/2022arXiv221006903G/abstract>`_ for :math:`\mbox{H}\alpha` using 0.6 bandwidth.
 Other indices can be added easily by editing the indices table (see `The indices table <https://actin2.readthedocs.io/en/latest/add_index.html>`_).
 
 Implemented spectrographs:
