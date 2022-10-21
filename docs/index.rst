@@ -39,7 +39,7 @@ where ``files`` is the list of fits spectra file paths to be read, ``ìndices`` 
 
 ACTIN is being developed in a `public repository on GitHub`_, if you have any trouble, please open an issue there.
 
-.. _public repository on GitHub: https://github.com/gomesdasilva/ACTIN
+.. _public repository on GitHub: https://github.com/gomesdasilva/ACTIN2
 
 
 .. _installation:
