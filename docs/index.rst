@@ -47,7 +47,7 @@ ACTIN is being developed in a `public repository on GitHub`_, if you have any tr
 Installation
 ------------
 
-Clone the `github repository <https://github.com/gomesdasilva/ACTIN>`_ to a directory of your choice and install via:
+Clone the `github repository <https://github.com/gomesdasilva/ACTIN2>`_ to a directory of your choice and install via:
 
 .. code:: bash
 
