@@ -4,7 +4,5 @@
 
 Spectral Activity Indices Tool
 
-Beta version. In development.
-
 See the [documentation](https://actin2.readthedocs.io/en/latest/index.html#)
 
