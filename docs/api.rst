@@ -4,11 +4,11 @@ API
 .. autosummary::
    :toctree: generated
 
-   actin2.ACTIN
-   actin2.actin2.run
-   actin2.actin2.ReadSpec
-   actin2.indtable.IndTable
-   actin2.calcindices.CalcIndices
+   .. actin2.ACTIN
+   .. actin2.actin2.run
+   .. actin2.actin2.ReadSpec
+   .. actin2.indtable.IndTable
+   .. actin2.calcindices.CalcIndices
 
 .. automodule:: actin2.actin2
    :members:
