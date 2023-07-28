@@ -59,16 +59,16 @@ Contents
 --------
 
 .. toctree::
-   :maxdepth: 1
+  :maxdepth: 1
 
-   getstarted
-   read_plot_spectrum
-   calc_act_general
-   CaII_to_rhk
-   add_index
-   mod_indices_table
-   add_spec
-   api
+  getstarted
+  read_plot_spectrum
+  calc_act_general
+  CaII_to_rhk
+  add_index
+  mod_indices_table
+  add_spec
+  api
 
 
 
