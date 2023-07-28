@@ -2,7 +2,7 @@ API
 ===
 
 .. autosummary::
-   .. :toctree: generated
+   :toctree: generated
 
    actin2.ACTIN
    actin2.actin2.run
