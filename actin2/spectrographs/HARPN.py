@@ -210,9 +210,6 @@ class HARPN:
             print(f"{__class__.__name__} WARNING: Cannot shift spectrum to target rest frame")
 
 
-        # Flux photon noise:
-        spec['flux_err'] = np.sqrt(abs(spec['flux_raw']))
-
         # Deblaze:
         if headers['ftype'] == 's1d':
             # Already deblazed
@@ -221,6 +218,11 @@ class HARPN:
         if headers['ftype'] == 'e2ds':
             blaze_file = hdr['HIERARCH TNG DRS BLAZE FILE']
             spec['flux'], flg = self._deblaze(file, spec['flux_raw'], blaze_file, flg, instr)
+
+        # Flux uncertainty:
+        # Note: Always use 2d spectra to estimate correct flux uncertainties. If using just 1d spectra, the errors will not be correct because they are not computed on the "real" flux counts of the detector (the flux was deblazed). They will be around 3-4 times smaller than the "true" error values.
+        flux_rel_err = np.sqrt(abs(spec['flux_raw']))/abs(spec['flux_raw'])
+        spec['flux_err'] = flux_rel_err * spec['flux']
 
 
         if get_ccf and ccf_file:
