@@ -5,7 +5,8 @@ API
    :toctree: generated
 
    actin2.actin2.ACTIN
-   actin2.readspec.ReadSpec
+   actin2.actin2.run
+   actin2.actin2.ReadSpec
    actin2.indtable.IndTable
    actin2.calcindices.CalcIndices
 
