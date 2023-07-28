@@ -4,5 +4,5 @@
 
 Spectral Activity Indices Tool
 
-For instructions/tutorials see the [documentation](https://actin2.readthedocs.io/en/latest/index.html#).
+For more information and instructions/tutorials see the [documentation](https://actin2.readthedocs.io/en/latest/index.html#).
 
