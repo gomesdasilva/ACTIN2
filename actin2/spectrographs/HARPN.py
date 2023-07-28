@@ -221,6 +221,7 @@ class HARPN:
 
         # Flux uncertainty:
         # Note: Always use 2d spectra to estimate correct flux uncertainties. If using just 1d spectra, the errors will not be correct because they are not computed on the "real" flux counts of the detector (the flux was deblazed). They will be around 3-4 times smaller than the "true" error values.
+        np.seterr(divide='ignore', invalid='ignore')
         flux_rel_err = np.sqrt(abs(spec['flux_raw']))/abs(spec['flux_raw'])
         spec['flux_err'] = flux_rel_err * spec['flux']
 
