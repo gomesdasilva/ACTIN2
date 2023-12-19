@@ -102,7 +102,6 @@ class ESPRESSO:
         snr_med, _ = self._get_snr(hdr)
         headers['snr_med'] = snr_med
 
-
         # if no instrument keyword is present in fits file:
         if headers['instr'] is None:
             headers['instr'] = instr
@@ -114,8 +113,8 @@ class ESPRESSO:
             headers['ftype'] = 'S2D'
             
             spec['flux'] = spec['flux_raw']/spec['dlldata']
-            flux_rel_err = spec['flux_err']/spec['flux_raw']
-            spec['flux_err'] = flux_rel_err * spec['flux']
+            flux_rel_err = spec['flux_err']/abs(spec['flux_raw'])
+            spec['flux_err'] = flux_rel_err * abs(spec['flux'])
 
 
         # The RV used to calibrate the wavelength to the stellar rest frame can come from the CCF, the spectrum headers or as input:
