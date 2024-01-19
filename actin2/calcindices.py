@@ -227,14 +227,15 @@ class CalcIndices:
         if interp:
             wave_i, flux_i, frac_low, frac_high = _interp_band_lims(flux, wave, wmin, wmax, step)
             _, flux_err_i, _, _ = _interp_band_lims(flux_err, wave, wmin, wmax, step)
+            npix = len(flux_i) -2 + frac_low + frac_high
         else:
             mask = (wave >= wmin) & (wave <= wmax)
             flux_i = flux[mask]
             flux_err_i = flux_err[mask]
             wave_i = wave[mask]
+            npix = len(flux_i)
 
         Rneg_ln = self._calc_Rneg_ln(flux_i)
-        npix = len(flux_i) -2 + frac_low + frac_high
 
         
         if bandtype == 'tri':
