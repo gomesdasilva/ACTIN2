@@ -27,7 +27,7 @@ class CalcIndices:
         indices (dict): Dictionary with indices data.
     """
 
-    def __init__(self, spectrum, headers, indices, step=1e-3, table_df=None, plot_lines=False, full_output=False, interp=True, verb=False):
+    def __init__(self, spectrum, headers, indices, step=1e-5, table_df=None, plot_lines=False, full_output=False, interp=True, verb=False):
 
         if "flux" not in spectrum:
             raise KeyError(f"{__class__.__name__} ERROR: There is no 'flux' keyword in the 'spectrum' dictionary")
@@ -83,7 +83,6 @@ class CalcIndices:
         self.indices = data
 
 
-
     def calc_index(self, wave, flux, flux_err, noise, index, step, ind_table, plot_lines, full_output, interp, verb):
 
         # get index from ind_table:
@@ -111,22 +110,27 @@ class CalcIndices:
 
 
             if len(wave.shape) == 2:
-                w, f, f_err = self._spec_order(wave, flux, flux_err, ctr, win, bandtype, verb=verb)
+                order = self._spec_order(wave, flux, flux_err, ctr, win, bandtype, verb=verb)
+                w = wave[order]
+                f = flux[order]
+                f_err = flux_err[order]
             if len(wave.shape) == 1:
                 w = self._check_wave_range(wave, index, ind_table, verb=verb)
-                f = flux; f_err= flux_err
+                f = flux; f_err = flux_err
 
 
             if w is None or f is None: # the exception was taken care off above
                 return dict()
 
-
-            flux_band, flux_band_err, Rneg_ln = self.calc_flux_band(w, f, f_err, noise, ctr, win, bandtype, step, plot_lines, interp, verb=verb)
+            flux_band, flux_band_err, Rneg_ln, npix = self.calc_flux_band(w, f, f_err, noise, ctr, win, bandtype, step, show_plot=plot_lines, interp=interp, verb=verb)
 
             if full_output:
                 lines[line + '_F'] = flux_band
                 lines[line + '_F_err'] = flux_band_err
                 lines[line + '_Rneg'] = Rneg_ln
+                lines[line + '_npix'] = npix
+                if len(wave.shape) == 2:
+                    lines[line + '_order'] = order
                 
 
             Rneg_lines[i] = Rneg_ln
@@ -142,23 +146,22 @@ class CalcIndices:
             win_list[i] = win
 
 
-        val = np.sum(F_num)/np.sum(F_denum)
+        ind = np.sum(F_num)/np.sum(F_denum)
 
-        val_err = np.sqrt(np.sum(F_num_err**2) + val**2 * np.sum(F_denum_err**2)) / (np.sum(F_denum))
+        ind_err = np.sqrt(np.sum(F_num_err**2) + ind**2 * np.sum(F_denum_err**2)) / (np.sum(F_denum))
 
         # Ratio of negative flux to total flux:
         Rneg = np.mean(Rneg_lines)
 
         data = {}
-        data[index] = val
-        data[index + '_err'] = val_err
+        data[index] = ind
+        data[index + '_err'] = ind_err
         data[index + '_Rneg'] = Rneg
 
         if full_output:
             data.update(lines)
 
         return data
-
 
 
     def calc_flux_band(self, wave, flux, flux_err, noise, ctr, win, bandtype, step, show_plot=False, interp=True, verb=False):
@@ -182,13 +185,12 @@ class CalcIndices:
                 ndarray: Interpolated x-axis data.
                 ndarray: Interpolated y-axis data.
             """
-            # reso_ratio = np.average(np.diff(wave))/step
-
-            mask = (wave >= wmin) & (wave <= wmax)
-
             # wavelength right before and after the window limits:
             wave_int_low = (wave[wave < wmin][-1], wave[wave >= wmin][0])
             wave_int_high = (wave[wave <= wmax][-1], wave[wave > wmax][0])
+
+            reso_low = np.array(wave_int_low).ptp()
+            reso_high = np.array(wave_int_high).ptp()
 
             interv_low = (wave >= wave_int_low[0]) & (wave <= wave_int_low[1])
             interv_high = (wave >= wave_int_high[0]) & (wave <= wave_int_high[1])
@@ -202,7 +204,6 @@ class CalcIndices:
             interp_low = interp1d(wave_low, array_low, kind='linear', fill_value="extrapolate")
             interp_high= interp1d(wave_high, array_high, kind='linear', fill_value="extrapolate")
 
-
             wave_i_low = np.arange(min(wave_low), max(wave_low) + step, step)
             array_i_low = interp_low(wave_i_low)
 
@@ -212,15 +213,20 @@ class CalcIndices:
             mask_low = (wave_i_low >= wmin)
             mask_high = (wave_i_high <= wmax)
 
-            wave_i = np.r_[min(wave_i_low[mask_low]), wave[mask], max(wave_i_high[mask_high])]
-            array_i = np.r_[array_i_low[mask_low][0], array[mask], array_i_high[mask_high][-1]]
+            frac_low = wave_i_low[mask_low].ptp()/reso_low
+            frac_high = wave_i_high[mask_high].ptp()/reso_high
 
-            return wave_i, array_i
+            mask = (wave >= wmin) & (wave <= wmax)
+
+            wave_i = np.r_[min(wave_i_low[mask_low]), wave[mask], max(wave_i_high[mask_high])]
+            array_i = np.r_[array_i_low[mask_low][0] * frac_low, array[mask], array_i_high[mask_high][-1] * frac_high]
+
+            return wave_i, array_i, frac_low, frac_high
 
 
         if interp:
-            wave_i, flux_i = _interp_band_lims(flux, wave, wmin, wmax, step)
-            _, flux_err_i = _interp_band_lims(flux_err, wave, wmin, wmax, step)
+            wave_i, flux_i, frac_low, frac_high = _interp_band_lims(flux, wave, wmin, wmax, step)
+            _, flux_err_i, _, _ = _interp_band_lims(flux_err, wave, wmin, wmax, step)
         else:
             mask = (wave >= wmin) & (wave <= wmax)
             flux_i = flux[mask]
@@ -228,6 +234,7 @@ class CalcIndices:
             wave_i = wave[mask]
 
         Rneg_ln = self._calc_Rneg_ln(flux_i)
+        npix = len(flux_i) -2 + frac_low + frac_high
 
         
         if bandtype == 'tri':
@@ -238,7 +245,15 @@ class CalcIndices:
             bp_i = np.where(bp_mask, 1, 0.0)
 
         flux_band = sum(flux_i * bp_i)/win
-        flux_band_var= sum((flux_err_i**2 + noise**2) * bp_i**2)/win**2
+        flux_band_var = sum((flux_err_i**2 + noise**2) * bp_i**2)/win**2
+
+        # plt.title(f"npix = {npix}")
+        # plt.plot(wave, flux, 'k.-')
+        # plt.plot(wave_i, flux_i, 'b.-')
+        # plt.plot(wave_i, bp_i, 'g.-')
+        # plt.axvline(wmin, color='r')
+        # plt.axvline(wmax, color='r')
+        # plt.show()
 
         if show_plot:
             if bandtype == 'tri':
@@ -259,11 +274,10 @@ class CalcIndices:
             plt.xlim(wmin-win/2, wmax+win/2)
             plt.show()
 
-        return flux_band, np.sqrt(flux_band_var), Rneg_ln
+        return flux_band, np.sqrt(flux_band_var), Rneg_ln, npix #!
 
 
     def _check_wave_range(self, wave, index, table_df, verb=False):
-
         ln_ids = table_df[table_df.ind_id==index].ln_id.values
 
         for line in ln_ids:
@@ -281,7 +295,8 @@ class CalcIndices:
                 return wave
 
 
-    def _spec_order(self, wave_2d, flux_2d, flux_2d_err, ln_ctr, ln_win, bandtype, type='dist', show_orders=False, verb=False):
+    @staticmethod
+    def _spec_order(wave_2d, flux_2d, flux_2d_err, ln_ctr, ln_win, bandtype, type='dist', show_orders=False, verb=False):
 
         if flux_2d_err is None:
             flux_2d_err = np.zeros_like(flux_2d)
@@ -306,7 +321,7 @@ class CalcIndices:
             printif(f"{sys._getframe().f_code.co_name} ERROR: bandpass outside wavelength range", verb=verb)
             return None, None, None
 
-        #printif(f"available orders: {orders}", verb)
+        printif(f"available orders for line at {ln_ctr:.3f}: {orders}", verb)
 
         if show_orders:
             plt.title("spec_order: orders available for selected line")
@@ -321,9 +336,17 @@ class CalcIndices:
         # Selects the order with the higher distance to the wave edges from the bandpass limits:
         if type == 'dist':
             order = orders[np.argmax(min_dist)]
-            #printif(f"selected: {order}", verb)
+            printif(f"selected: {order}", verb)
+        if type == 'first':
+            order = orders[0]
+            printif(f"selected: {order}", verb)
+        if type == 'second':
+            order = orders[1]
+            printif(f"selected: {order}", verb)
 
-        return wave_2d[order], flux_2d[order], flux_2d_err[order]
+        #return wave_2d[order], flux_2d[order], flux_2d_err[order]
+        return order
+
 
 
     def _calc_Rneg_ln(self, flux):

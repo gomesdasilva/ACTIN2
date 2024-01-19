@@ -172,7 +172,10 @@ class ACTIN:
             w = read_spec.spec.spectrum[wkey]
 
             if len(f.shape) == 2:
-                w, f, _ = self.CalcIndices._spec_order(self, w, f, None, ctr, win, bt, type='dist', show_orders=False, verb=False)
+                order = self.CalcIndices._spec_order(w, f, None, ctr, win, bt, type='dist', show_orders=False, verb=False)
+
+                w = w[order]
+                f = f[order]
 
 
             mask = (w > ctr - win * ntol)

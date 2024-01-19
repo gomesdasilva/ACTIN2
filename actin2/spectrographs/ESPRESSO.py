@@ -23,6 +23,7 @@ spec_hdrs = dict(
     bis      = 'HIERARCH ESO QC CCF BIS SPAN', # CCF bisector span [km/s]     
     bis_err  = 'HIERARCH ESO QC CCF BIS SPAN ERROR', # CCF bisector span err
     exptime  = 'EXPTIME',
+    airmass  = 'HIERARCH ESO TEL3 AIRM START',
     snr50    = 'HIERARCH ESO QC ORDER50 SNR',
     spec_rv  = 'HIERARCH ESO OCS OBJ RV',
     ra       = 'RA',      # [deg]
@@ -112,9 +113,7 @@ class ESPRESSO:
         if len(spec['flux_raw'].shape) == 2:
             headers['ftype'] = 'S2D'
             
-            spec['flux'] = spec['flux_raw']/spec['dlldata']
-            flux_rel_err = spec['flux_err']/abs(spec['flux_raw'])
-            spec['flux_err'] = flux_rel_err * abs(spec['flux'])
+            spec['flux'] = spec['flux_raw']
 
 
         # The RV used to calibrate the wavelength to the stellar rest frame can come from the CCF, the spectrum headers or as input:
@@ -264,33 +263,21 @@ class ESPRESSO:
                 wave_raw = hdu[1].data['wavelength_air'],
             )
 
-        elif hdr['HIERARCH ESO PRO CATG'] == 'S2D_A':
+        elif hdr['HIERARCH ESO PRO CATG'] == 'S1D_FINAL_A':
+            spectrum = hdu['SPECTRUM'].data
             spec = dict(
-                flux_raw = hdu[1].data, # deblazed
-                flux_err = hdu[2].data,
-                wave_raw = hdu[5].data, # wavelength air (bary)
-                dlldata = hdu[7].data, # for normalization
+                flux_raw = spectrum['FLUX_EL'][0],
+                flux_err = spectrum['ERR_EL'][0],
+                wave_raw = spectrum['WAVE_AIR'][0]
             )
 
-            if file is not None:
-                blaze_file = file.split("_S2D")[0] + "_S2D_BLAZE_A.fits"
-
-                if not os.path.isfile(blaze_file):
-                    printif(f"Blaze file {blaze_file} not found. Spectrum was not deblazed.")
-                    return spec, hdr
-
-                hdu = fits.open(blaze_file)
-                spec['blaze'] = hdu[1].data
-            else:
-                blaze_file = "r." + hdu[0].header["ARCFILE"].split(".fits")[0] + "_S2D_BLAZE_A.fits"
-                blaze_file = os.path.join(os.path.dirname(self.file), blaze_file)
-
-                if not os.path.isfile(blaze_file):
-                    printif(f"Blaze file {blaze_file} not found.")
-                    return spec, hdr
-
-                hdu = fits.open(blaze_file)
-                spec['blaze'] = hdu[1].data
+        elif hdr['HIERARCH ESO PRO CATG'] == 'S2D_A':
+            spec = dict(
+                flux_raw = hdu['SCIDATA'].data, # deblazed
+                flux_err = hdu['ERRDATA'].data,
+                wave_raw = hdu['WAVEDATA_AIR_BARY'].data, # wavelength air (bary)
+                dlldata = hdu['DLLDATA_AIR_BARY'].data, # for normalization
+            )
         
         else:
             raise ValueError(f"{__class__.__name__} ERROR: File '{hdr['HIERARCH ESO PRO CATG']}' not implemented")
