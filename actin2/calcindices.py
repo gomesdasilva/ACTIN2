@@ -248,13 +248,6 @@ class CalcIndices:
         flux_band = sum(flux_i * bp_i)/win
         flux_band_var = sum((flux_err_i**2 + noise**2) * bp_i**2)/win**2
 
-        # plt.title(f"npix = {npix}")
-        # plt.plot(wave, flux, 'k.-')
-        # plt.plot(wave_i, flux_i, 'b.-')
-        # plt.plot(wave_i, bp_i, 'g.-')
-        # plt.axvline(wmin, color='r')
-        # plt.axvline(wmax, color='r')
-        # plt.show()
 
         if show_plot:
             if bandtype == 'tri':
