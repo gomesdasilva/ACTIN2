@@ -276,7 +276,7 @@ class ESPRESSO:
                 flux_raw = hdu['SCIDATA'].data, # deblazed
                 flux_err = hdu['ERRDATA'].data,
                 wave_raw = hdu['WAVEDATA_AIR_BARY'].data, # wavelength air (bary)
-                dlldata = hdu['DLLDATA_AIR_BARY'].data, # for normalization
+                dlldata = hdu['DLLDATA_AIR_BARY'].data, # pixel sizes
             )
         
         else:
