@@ -31,7 +31,7 @@ spec_hdrs = dict(
     prog_id  = 'HIERARCH ESO OBS PROG ID',
     pi_coi   = 'PI-COI',
     ftype    = 'HIERARCH ESO PRO CATG',
-    drs_id   = 'HIERARCH ESO PRO REC1 DRS ID',
+    drs_id   = "ESO PRO REC1 PIPE ID",
     ccf_mask = 'HIERARCH ESO QC CCF MASK',
 
 )
