@@ -182,7 +182,7 @@ class HARPS:
                 self.ccf_bisector = ccf_bisector
 
 
-        keys = ['rv', 'berv', 'ccf_noise', 'fwhm', 'spec_rv', 'rv_wave_corr']
+        keys = ['rv', 'berv', 'ccf_noise', 'fwhm', 'bis', 'spec_rv', 'rv_wave_corr']
         for key in keys:
             if key in headers:
                 try:
