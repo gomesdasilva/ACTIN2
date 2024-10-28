@@ -100,3 +100,82 @@ def read_headers(hdr, headers, data=None, verb=False):
             printif(f"Header {key} not in fits file", verb)
             data[key] = None
     return data
+
+
+# 2.0_beta_12
+import astropy.units as u
+from specutils.manipulation import FluxConservingResampler, LinearInterpolatedResampler, SplineInterpolatedResampler
+
+
+def make_specutils(wave, flux, flux_e):
+    from specutils import Spectrum1D
+    from astropy.nddata import StdDevUncertainty
+    import astropy.units as u
+    if flux_e is not None:
+        return Spectrum1D(spectral_axis=wave*u.AA, flux=flux*u.dimensionless_unscaled, uncertainty=StdDevUncertainty(flux_e*u.dimensionless_unscaled))
+    else:
+        return Spectrum1D(spectral_axis=wave*u.AA, flux=flux*u.dimensionless_unscaled)
+
+
+def from_specutils(spec):
+    try:
+        return spec.wavelength.value, spec.flux.value, spec.uncertainty.array
+    except AttributeError:
+        return spec.wavelength.value, spec.flux.value
+    
+
+
+def interpolate_region(wave: np.array, flux: np.array, flux_e: np.array, wmin: float, wmax: float, grid='arange', n_points=10, wstep=0.01, method='cubic'):
+    """Interpolate spectral region.
+
+    Parameters:
+    -----------
+        wave : np.array
+            Spectral wavelength (A).
+        flux : np.array
+            Spectral flux.
+        flux_e : np.array
+            Spectral flux uncertainty.
+        wmin : float
+            Lower limit of wavelength region (A).
+        wmax : float
+            Upper limit of wavelength region (A).
+        grid : str
+            Type of wavelength grid: if 'arange' (default) use numpy.arange function with a step of 'wstep'; if 'linspace' use numpy.linspace function with 'n_points' number of points.
+        n_points : int
+            Number of points in the interpolated region if using grid type 'linspace'.
+        wstep : float
+            Wavelength step used in 'arange' grid (A).
+        method : str
+            Method used for interpolation: if 'cubic' (default) use cubic interpolation; if 'linear' use linear interpolation.
+    
+    Returns
+    -------
+        wave_re : np.array
+            Resampled wavelwngth in region (A)
+        flux_re : np.array
+            Resampled flux in region (arbitray units)
+        flux_e_re : np.array
+            Resampled flux uncertainty in region (arbitrary units)
+    """
+    if grid=='linspace':
+        x_interp = np.linspace(wmin, wmax, n_points)
+    if grid=='arange':
+        x_interp = np.arange(wmin, wmax, wstep)
+    if flux_e is not None:
+        mask = np.isnan(flux) | np.isnan(flux_e)
+        wave = wave[~mask]
+        flux = flux[~mask]
+        flux_e = flux_e[~mask]
+        spec = make_specutils(wave, flux, flux_e)
+    else:
+        mask = np.isnan(flux)
+        wave = wave[~mask]
+        flux = flux[~mask]
+        spec = make_specutils(wave, flux, None)
+    if method == 'cubic':
+        resampler = SplineInterpolatedResampler(bin_edges='nan_fill')
+    if method == 'linear':
+        resampler = LinearInterpolatedResampler(extrapolation_treatment='nan_fill')
+    spec_re = resampler(spec, x_interp * u.AA)
+    return from_specutils(spec_re)

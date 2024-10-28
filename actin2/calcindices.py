@@ -6,7 +6,7 @@ from scipy.interpolate import interp1d
 
 
 from .indtable import IndTable
-from .spectrographs._spec_tools import printif
+from .spectrographs._spec_tools import printif, interpolate_region
 
 
 class CalcIndices:
@@ -187,7 +187,7 @@ class CalcIndices:
             """
             # wavelength right before and after the window limits:
             wave_int_low = (wave[wave < wmin][-1], wave[wave >= wmin][0])
-            wave_int_high = (wave[wave <= wmax][-1], wave[wave > wmax][0])
+            wave_int_high = (wave[wave < wmax][-1], wave[wave >= wmax][0])
 
             reso_low = np.array(wave_int_low).ptp()
             reso_high = np.array(wave_int_high).ptp()
@@ -202,7 +202,7 @@ class CalcIndices:
             array_high = array[interv_high]
 
             interp_low = interp1d(wave_low, array_low, kind='linear', fill_value="extrapolate")
-            interp_high= interp1d(wave_high, array_high, kind='linear', fill_value="extrapolate")
+            interp_high = interp1d(wave_high, array_high, kind='linear', fill_value="extrapolate")
 
             wave_i_low = np.arange(min(wave_low), max(wave_low) + step, step)
             array_i_low = interp_low(wave_i_low)
@@ -218,13 +218,20 @@ class CalcIndices:
 
             mask = (wave >= wmin) & (wave <= wmax)
 
-            wave_i = np.r_[min(wave_i_low[mask_low]), wave[mask], max(wave_i_high[mask_high])]
+            wave_i = np.r_[wave_i_low[mask_low][0], wave[mask], wave_i_high[mask_high][-1]]
+
             array_i = np.r_[array_i_low[mask_low][0] * frac_low, array[mask], array_i_high[mask_high][-1] * frac_high]
 
             return wave_i, array_i, frac_low, frac_high
 
-
-        if interp:
+        # This new interpolation is more exact but gives same results as the standard interpolation (which approximates the bandpass to the closest interpolated pixel)
+        if interp == 'new':
+            mask = (wave >= wmin) & (wave <= wmax)
+            npix = len(wave[mask])
+            wstep = np.median(np.diff(wave))
+            n_points = int((wmax-wmin)/wstep) # points in window
+            wave_i, flux_i, flux_err_i = interpolate_region(wave, flux, flux_err, wmin, wmax, grid='linspace', n_points=n_points, method='cubic')
+        elif interp is True:
             wave_i, flux_i, frac_low, frac_high = _interp_band_lims(flux, wave, wmin, wmax, step)
             _, flux_err_i, _, _ = _interp_band_lims(flux_err, wave, wmin, wmax, step)
             npix = len(flux_i) -2 + frac_low + frac_high
@@ -245,8 +252,12 @@ class CalcIndices:
             bp_mask = (wave_i >= ctr - win/2) & (wave_i <= ctr + win/2)
             bp_i = np.where(bp_mask, 1, 0.0)
 
-        flux_band = sum(flux_i * bp_i)/win
-        flux_band_var = sum((flux_err_i**2 + noise**2) * bp_i**2)/win**2
+        if interp == 'new':
+            flux_band = sum(flux_i * bp_i * n_points)/win 
+            flux_band_var = sum((flux_err_i**2 + noise**2) * bp_i**2 * n_points**2)/win**2
+        else:
+            flux_band = sum(flux_i * bp_i)/win # flux per angstrom
+            flux_band_var = sum((flux_err_i**2 + noise**2) * bp_i**2)/win**2
 
 
         if show_plot:

@@ -61,16 +61,12 @@ class ReadSpec:
                             if instrument in os.path.basename(file):
                                 instr = instrument
 
-            #printif(f"loaded instr: {instr}", verb)
-
 
             # import class from module with names 'instr': the instrument class
             try:
                 spectrograph = importlib.import_module("." + instr, "actin2.spectrographs").__getattribute__(instr)
             except ModuleNotFoundError:
                 raise ModuleNotFoundError(f"{__class__.__name__} ERROR: Instrument '{instr}' not detected in 'spectrographs' directory. Available instruments are: {spectrographs.__all__}")
-
-            #print(spectrograph);sys.exit()
 
 
         # Create spectrograph object, this object will have the attributes given to him by the spectrograph class (can be different for different spectrographs: e.g. having bisector dictionary):

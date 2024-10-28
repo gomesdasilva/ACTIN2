@@ -198,12 +198,17 @@ class HARPS:
         elif headers['ftype'] == 's1d' and file.endswith("_rv.fits"):
             spec['wave'] = spec['wave_raw']
 
+        elif headers['ftype'] == 'e2ds' and headers['drs'] == 'EGGS_3.8':
+            spec['wave'] = wave_star_rest_frame(spec['wave_raw'], headers['rv_wave_corr'])
+            spec['wave'] = wave_corr_berv(spec['wave'], headers['berv'])
+
         elif headers['ftype'] == 'e2ds':
             if 'berv' in headers and berv_in is None:
                 spec['wave'] = wave_corr_berv(spec['wave_raw'], headers['berv'])
             if isinstance(berv_in, float):
                 headers['berv_in'] = berv_in
                 spec['wave'] = wave_corr_berv(spec['wave_raw'], headers['berv_in'])
+            spec['wave'] = wave_star_rest_frame(spec['wave'], headers['rv_wave_corr'])
 
         else:
             flg = "WaveNotCorr"

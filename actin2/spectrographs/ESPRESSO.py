@@ -79,7 +79,7 @@ class ESPRESSO:
             bis_hdrs.update(add_bis_hdrs)
         
         flg = 'OK'
-        instr = 'ESPRESSO'
+        #instr = 'ESPRESSO'
 
         np.seterr(divide='ignore', invalid='ignore')
 
@@ -95,6 +95,8 @@ class ESPRESSO:
 
         # Get spectrum selected header values:
         headers = read_headers(hdr, spec_hdrs, data=None, verb=verb)
+
+        instr = headers['instr']
 
         # Get target:
         headers['obj'] = self._get_target(hdr, instr, verb)
@@ -271,7 +273,7 @@ class ESPRESSO:
                 wave_raw = spectrum['WAVE_AIR'][0]
             )
 
-        elif hdr['HIERARCH ESO PRO CATG'] == 'S2D_A':
+        elif hdr['HIERARCH ESO PRO CATG'] in ('S2D_A', 'S2D_SKYSUB_A', 'S2D_TELL_CORR_A'):
             spec = dict(
                 flux_raw = hdu['SCIDATA'].data, # deblazed
                 flux_err = hdu['ERRDATA'].data,
