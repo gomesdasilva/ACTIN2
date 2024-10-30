@@ -186,7 +186,7 @@ class CalcIndices:
                 ndarray: Interpolated y-axis data.
             """
             # wavelength right before and after the window limits:
-            wave_int_low = (wave[wave < wmin][-1], wave[wave >= wmin][0])
+            wave_int_low = (wave[wave <= wmin][-1], wave[wave > wmin][0])
             wave_int_high = (wave[wave < wmax][-1], wave[wave >= wmax][0])
 
             reso_low = np.array(wave_int_low).ptp()
@@ -209,6 +209,17 @@ class CalcIndices:
 
             wave_i_high = np.arange(min(wave_high), max(wave_high) + step, step)
             array_i_high = interp_high(wave_i_high)
+
+            # Dioagnostic
+            # plt.plot(wave, array, 'k-', lw=0.7)
+            # plt.plot(wave_low, array_low, 'b.-')
+            # plt.plot(wave_i_low, array_i_low, 'b|')
+            # plt.axvline(wmin, color='b', ls='--')
+            # plt.plot(wave_high, array_high, 'r.-')
+            # plt.plot(wave_i_high, array_i_high, 'r|')
+            # plt.axvline(wmax, color='r' , ls='--')
+            # plt.xlim(wmin - 0.5, wmax + 0.5)
+            # plt.show()
 
             mask_low = (wave_i_low >= wmin)
             mask_high = (wave_i_high <= wmax)
